@@ -1,0 +1,4 @@
+lib/
+node_modules/
+.envrc
+npm-debug.log

@@ -1,0 +1,10 @@
+.git
+.gitignore
+.envrc
+.babelrc
+.eslintrc
+dev.js
+npm-debug.log
+
+src/
+node_modules/
