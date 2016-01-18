@@ -3,7 +3,7 @@ FROM node:slim
 ENV RENDERER_ACCESS_KEY=changeme CONCURRENCY=1
 
 # Add subpixel hinting
-COPY .fonts.conf /root
+COPY .fonts.conf /root/.fonts.conf
 
 COPY . /app
 WORKDIR /app

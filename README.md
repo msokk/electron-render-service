@@ -7,8 +7,7 @@ Simple PDF render service, accepts webpage URL and returns it as a PDF.
 
 ## Docker usage
 
-Based on official [Node.js Jessie](https://hub.docker.com/_/node/) image,
-uses latest [electron](https://github.com/atom/electron).
+Based on official [Node.js Jessie](https://hub.docker.com/_/node/) image, uses latest [electron](https://github.com/atom/electron).
 
 
 1. `docker run -t -e RENDERER_ACCESS_KEY=secret -p 3000:3000 msokk/electron-render-service`
@@ -34,11 +33,12 @@ RENDERER_ACCESS_KEY=secret xvfb-run --server-args="-screen 0 800x600x24" npm sta
 wget -o out.pdf http://localhost:3000/pdf?url=https://github.com/msokk/electron-render-service&access_key=secret
 ```
 
+
 ## Endpoints
 
 #### `GET /pdf` - Render PDF
 
-> Query params ([About PDF params](https://github.com/atom/electron/blob/master/docs/api/web-contents.md#webcontentsprinttopdfoptions-callback)):
+*Query params ([About PDF params](https://github.com/atom/electron/blob/master/docs/api/web-contents.md#webcontentsprinttopdfoptions-callback)):*
 
   * `access_key` - Authentication key.
   * `url` - Full URL to fetch.
@@ -50,7 +50,7 @@ wget -o out.pdf http://localhost:3000/pdf?url=https://github.com/msokk/electron-
 
 #### `GET /stats` - Display render pool stats
 
-> Query params:
+*Query params:*
 
 * `access_key` - Generic authentication key is required.
 
