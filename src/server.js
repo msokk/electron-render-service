@@ -18,6 +18,8 @@ morgan.token('key-label', req => req.keyLabel);
 app.use(morgan(`[:date[iso]] :key-label@:remote-addr - :method :status
 :url :res[content-length] ":user-agent" :response-time ms`.replace('\n', '')));
 
+app.disable('x-powered-by');
+app.enable('trust proxy');
 
 /**
  * GET /pdf - Render PDF
