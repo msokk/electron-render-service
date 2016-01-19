@@ -81,24 +81,30 @@ export function renderWorker(window, task, done) {
     return done({ statusCode: 500, code: 'INVALID_URL', message: 'The URL is invalid.' });
   }
 
-  // Loading failures
-  webContents.once('did-fail-load', (...args) => handleLoadingError(done, ...args));
+  const timeoutTimer = setTimeout(() => webContents.emit('timeout'), TIMEOUT * 1000);
 
-  // Renderer process has crashed
-  webContents.once('crashed', () => {
-    done({ statusCode: 500, code: 'RENDERER_CRASH', message: `Render process crashed.` });
+  webContents.once('finished', (type, ...args) => {
+    clearTimeout(timeoutTimer);
+
+    switch (type) {
+      // Loading failures
+      case 'did-fail-load': handleLoadingError(done, ...args);
+        break;
+      // Renderer process has crashed
+      case 'crashed':
+        done({ statusCode: 500, code: 'RENDERER_CRASH', message: `Render process crashed.` });
+        break;
+      // Page loading timed out
+      case 'timeout':
+        done({ statusCode: 524, code: 'RENDERER_TIMEOUT', message: `Renderer timed out.` });
+        break;
+      // Page loaded successfully
+      case 'did-finish-load':
+        (task.type === 'pdf' ? renderPDF : renderImage).call(window, task, done);
+        break;
+      default: done({ statusCode: 500, code: 'UNKNOWN_EVENT', message: type });
+    }
   });
-
-  webContents.once('did-finish-load', () => {
-    (task.type === 'pdf' ? renderPDF : renderImage).call(window, task, done);
-  });
-
-  webContents.once('timeout', () => {
-    done({ statusCode: 524, code: 'RENDERER_TIMEOUT', message: `Renderer timed out.` });
-  });
-
-  // Timeout render job
-  webContents.timeoutTimer = setTimeout(() => webContents.emit('timeout'), TIMEOUT * 1000);
 
   webContents.loadURL(task.url, { extraHeaders: DEFAULT_HEADERS });
 }
@@ -115,6 +121,11 @@ export function createWindow() {
   // Set user agent
   const { webContents } = window;
   webContents.setUserAgent(`${webContents.getUserAgent()} ${pjson.name}/${pjson.version}`);
+
+  // Emit end events to an aggregate for worker to listen on once
+  ['did-fail-load', 'crashed', 'did-finish-load', 'timeout'].forEach(e => {
+    webContents.on(e, (...args) => webContents.emit('finished', e, ...args));
+  });
 
   return window;
 }

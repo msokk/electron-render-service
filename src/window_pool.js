@@ -64,13 +64,8 @@ export default class WindowPool {
     if (!window) throw new Error('Pool is empty while queue is not saturated!?');
     window.lock();
 
-
     renderWorker(window, task, (...args) => {
-      // Cleanup any old callbacks
-      window.webContents.removeAllListeners();
-      clearTimeout(window.webContents.timeoutTimer);
-
-      // Load blank state
+      // Load blank state after render
       window.loadURL('about:blank');
 
       window.unlock();
