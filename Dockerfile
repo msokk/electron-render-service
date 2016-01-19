@@ -19,4 +19,4 @@ RUN npm install --production && \
 
 EXPOSE 3000
 
-CMD xvfb-run --server-args="-screen 0 $WINDOW_WIDTHx$WINDOW_HEIGHTx24" npm start
+CMD xvfb-run --server-args="-screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24" npm start
