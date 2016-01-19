@@ -18,8 +18,13 @@ if (Object.keys(validKeys).length === 0) throw new Error('No access key defined!
 export default function authMiddleware(req, res, next) {
   const sentKey = req.query.access_key;
   const key = Object.keys(validKeys).filter(k => validKeys[k] === sentKey);
-  if (!sentKey || key.length === 0) return res.sendStatus(403);
+  if (!sentKey || key.length === 0) {
+    return res.status(403).send({
+      error: { code: 'UNAUTHORIZED', message: 'Invalid or missing access key.' },
+    });
+  }
 
+  /* eslint-disable no-param-reassign */
   req.keyLabel = key[0];
   next();
 }

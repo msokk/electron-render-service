@@ -1,22 +1,22 @@
 import express from 'express';
 import morgan from 'morgan';
+import responseTime from 'response-time';
 import { app as electronApp } from 'electron';
 
-import renderPool from './render_pool';
+import WindowPool from './window_pool';
 import auth from './auth';
+import { printUsage, printBootMessage, handleErrors, setContentDisposition } from './util';
 
 const INTERFACE = process.env.INTERFACE || '0.0.0.0';
 const PORT = process.env.PORT || 3000;
 const app = express();
 
-function printPDFUsage(url = '') {
-  return `Usage: GET ${url}/pdf?url=http://google.com&access_key=<token>`;
-}
+app.use(responseTime());
 
 // Log with token
 morgan.token('key-label', req => req.keyLabel);
 app.use(morgan(`[:date[iso]] :key-label@:remote-addr - :method :status
-:url :res[content-length] ":user-agent" :response-time ms`.replace('\n', '')));
+ :url :res[content-length] ":user-agent" :response-time ms`.replace('\n', '')));
 
 app.disable('x-powered-by');
 app.enable('trust proxy');
@@ -24,14 +24,46 @@ app.enable('trust proxy');
 /**
  * GET /pdf - Render PDF
  *
- * Query: https://github.com/atom/electron/blob/master/docs/api/web-contents.md#webcontentsprinttopdfoptions-callback
+ * Query params: https://github.com/atom/electron/blob/master/docs/api/web-contents.md#webcontentsprinttopdfoptions-callback
  */
 app.get('/pdf', auth, (req, res) => {
-  const { url = 'data:text/plain;charset=utf-8,' + printPDFUsage(),
-    marginsType = 0, pageSize = 'A4', printBackground = true, landscape = false } = req.query;
+  const {
+    url = 'data:text/plain;charset=utf-8,' + printUsage('pdf'),
+    marginsType = 0, pageSize = 'A4', printBackground = 'true', landscape = 'false',
+  } = req.query;
 
-  renderPool.enqueue({ url, res, type: 'pdf',
-    options: { marginsType, pageSize, landscape, printBackground } });
+  req.app.pool.enqueue({ url, type: 'pdf',
+    options: {
+      pageSize,
+      marginsType: parseInt(marginsType, 10),
+      landscape: landscape === 'true',
+      printBackground: printBackground === 'true',
+    },
+  }, (err, buffer) => {
+    if (handleErrors(err, req, res)) return;
+
+    setContentDisposition(res, 'pdf');
+    res.type('pdf').send(buffer);
+  });
+});
+
+/**
+ * GET /png|jpeg - Render png or jpeg
+ *
+ * Query params:
+ * x = 0, y = 0, width, height
+ * quality = 80 - JPEG quality
+ */
+app.get(/^\/(png|jpeg)/, auth, (req, res) => {
+  const type = req.params[0];
+  const { url = 'data:text/plain;charset=utf-8,' + printUsage(type) } = req.query;
+
+  req.app.pool.enqueue({ url, type, options: req.query }, (err, buffer) => {
+    if (handleErrors(err, req, res)) return;
+
+    setContentDisposition(res, type);
+    res.type(type).send(buffer);
+  });
 });
 
 
@@ -41,28 +73,26 @@ app.get('/pdf', auth, (req, res) => {
 app.get('/stats', auth, (req, res) => {
   if (req.keyLabel !== 'global') return res.sendStatus(403);
 
-  res.send(renderPool.stats());
+  res.send(req.app.pool.stats());
 });
 
 
 /**
  * GET / - Print usage
  */
-app.get('/', (req, res) => res.status(404).send(printPDFUsage()));
+app.get('/', (req, res) => {
+  res.send(printUsage());
+});
 
 
 // Electron finished booting
 electronApp.on('ready', () => {
-  renderPool.init();
-
-  const listener = app.listen(PORT, INTERFACE, () => {
-    const { port, address } = listener.address();
-    const url = `http://${address}:${port}`;
-    process.stdout.write(`Renderer listening on ${url}\n\n`);
-    process.stdout.write(printPDFUsage(url) + '\n');
-  });
+  app.pool = new WindowPool();
+  const listener = app.listen(PORT, INTERFACE, () => printBootMessage(listener));
 });
 
 
 // Stop Electron on SIG*
 process.on('exit', code => electronApp.exit(code));
+
+process.on('uncaughtException', err => { throw err; });

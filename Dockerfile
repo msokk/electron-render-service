@@ -1,6 +1,8 @@
 FROM node:slim
 
-ENV RENDERER_ACCESS_KEY=changeme CONCURRENCY=1
+MAINTAINER Mihkel Sokk <mihkelsokk@gmail.com>
+
+ENV RENDERER_ACCESS_KEY=changeme CONCURRENCY=1 WINDOW_WIDTH=1024 WINDOW_HEIGHT=768
 
 # Add subpixel hinting
 COPY .fonts.conf /root/.fonts.conf
@@ -16,4 +18,5 @@ RUN npm install --production && \
     apt-get clean
 
 EXPOSE 3000
-CMD xvfb-run --server-args="-screen 0 800x600x24" npm start
+
+CMD xvfb-run --server-args="-screen 0 $WINDOW_WIDTHx$WINDOW_HEIGHTx24" npm start
