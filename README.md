@@ -1,6 +1,7 @@
 # electron-render-service
 [![Docker Hub](https://img.shields.io/badge/docker-ready-blue.svg)](https://registry.hub.docker.com/u/msokk/electron-render-service/)
-[![](https://badge.imagelayers.io/msokk/electron-render-service:latest.svg)](https://imagelayers.io/?images=msokk/electron-render-service:latest 'Get your own badge on imagelayers.io')
+[![ImageLayers Size](https://img.shields.io/imagelayers/image-size/msokk/electron-render-service/latest.svg)]()
+[![Dependency Status](https://david-dm.org/msokk/electron-render-service.svg)](https://david-dm.org/msokk/electron-render-service)
 
 Simple PDF/PNG/JPEG render service, accepts webpage URL and returns the resource.
 
@@ -81,3 +82,7 @@ wget -o out.pdf http://localhost:3000/pdf?url=https://github.com/msokk/electron-
 * `WINDOW_HEIGHT` - Default window height (default: `768`)
 * `INTERFACE` - Network interface for Express to listen on (default: `0.0.0.0`)
 * `PORT` - (default: `3000`)
+
+## Rendering issues in latest Electron (Chrome 47)
+* [box-shadow is black in PDF](https://code.google.com/p/chromium/issues/detail?id=174583) - To keep the box shadow, add `-webkit-filter: blur(0);` rule next to it. Note that this rasterizes the whole layer, making large areas noticeably blurry. Or just hide the box shadow.
+
