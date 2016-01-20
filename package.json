@@ -1,6 +1,6 @@
 {
   "name": "electron-render-service",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Microservice for rendering PDF/PNG/JPEG from HTML with Electron",
   "scripts": {
     "start": "electron lib/server.js",
@@ -33,7 +33,7 @@
     "response-time": "^2.3.1"
   },
   "devDependencies": {
-    "babel-cli": "^6.4.0",
+    "babel-cli": "^6.4.5",
     "babel-eslint": "5.0.0-beta6",
     "babel-preset-es2015-node5": "^1.1.1",
     "babel-register": "^6.4.3",

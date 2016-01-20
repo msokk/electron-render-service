@@ -2,8 +2,8 @@ import pjson from '../package.json';
 import { BrowserWindow } from 'electron';
 
 const TIMEOUT = process.env.TIMEOUT || 30;
-const WINDOW_WIDTH = process.env.WINDOW_WIDTH || 1024;
-const WINDOW_HEIGHT = process.env.WINDOW_HEIGHT || 768;
+const WINDOW_WIDTH = parseInt(process.env.WINDOW_WIDTH, 10) || 1024;
+const WINDOW_HEIGHT = parseInt(process.env.WINDOW_HEIGHT, 10) || 768;
 const LIMIT = 3000; // Constrain screenshots to 3000x3000px
 
 const DEFAULT_HEADERS = 'Cache-Control: no-cache, no-store, must-revalidate';
@@ -39,10 +39,10 @@ function renderImage({ type, options }, done) {
   if (Object.keys(rect).length === 4) {
     // Avoid stretching by adding rect coordinates to size
     this.setSize(browserSize.width + rect.x, browserSize.height + rect.y);
-    this.capturePage(rect, handleCapture);
+    setTimeout(() => this.capturePage(rect, handleCapture), 50);
   } else {
     this.setSize(browserSize.width, browserSize.height);
-    this.capturePage(handleCapture);
+    setTimeout(() => this.capturePage(handleCapture), 50);
   }
 }
 
@@ -116,6 +116,9 @@ export function createWindow() {
   const window = new BrowserWindow({
     width: WINDOW_WIDTH, height: WINDOW_HEIGHT,
     frame: false, show: false,
+    webPreferences: {
+      blinkFeatures: 'OverlayScrollbars', // Slimmer scrollbars
+    },
   });
 
   // Set user agent
