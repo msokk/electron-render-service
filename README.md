@@ -25,12 +25,11 @@ sed -i 's/main/main contrib/g' /etc/apt/sources.list
 # Install packages needed for runtime
 apt-get update && apt-get install -y xvfb libgtk2.0-0 ttf-mscorefonts-installer libnotify4 libgconf2-4 libnss3
 
-# Clone project (not yet on NPM)
-git clone https://github.com/msokk/electron-render-service.git
-npm install
+# Install from NPM
+npm install -g electron-render-service
 
 # Run in virtual framebuffer
-RENDERER_ACCESS_KEY=secret xvfb-run --server-args="-screen 0 1024x768x24" npm start
+RENDERER_ACCESS_KEY=secret xvfb-run --server-args="-screen 0 1024x768x24" electron-render-service
 
 wget -o out.pdf http://localhost:3000/pdf?url=https://github.com/msokk/electron-render-service&access_key=secret
 ```
