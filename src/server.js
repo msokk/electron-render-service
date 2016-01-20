@@ -95,4 +95,5 @@ electronApp.on('ready', () => {
 // Stop Electron on SIG*
 process.on('exit', code => electronApp.exit(code));
 
+// Passthrough error handler to silence Electron prompt
 process.on('uncaughtException', err => { throw err; });

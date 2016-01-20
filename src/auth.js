@@ -10,7 +10,10 @@ Object.keys(process.env)
   .filter(k => process.env[k].length > 0)
   .forEach(k => validKeys[k.replace(KEY_PREFIX + '_', '').toLowerCase()] = process.env[k]);
 
-if (Object.keys(validKeys).length === 0) throw new Error('No access key defined!');
+if (Object.keys(validKeys).length === 0) {
+  process.stderr.write(`No ${KEY_PREFIX} environment variable defined!\n`);
+  process.exit(1);
+}
 
 /**
  * Simple token auth middleware
