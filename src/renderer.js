@@ -1,17 +1,26 @@
 import pjson from '../package.json';
 import { BrowserWindow } from 'electron';
 
+import { validateResult, RendererError } from './error_handler';
+
 const TIMEOUT = process.env.TIMEOUT || 30;
 const WINDOW_WIDTH = parseInt(process.env.WINDOW_WIDTH, 10) || 1024;
 const WINDOW_HEIGHT = parseInt(process.env.WINDOW_HEIGHT, 10) || 768;
 const LIMIT = 3000; // Constrain screenshots to 3000x3000px
-
+const DEVELOPMENT = process.env.NODE_ENV === 'development';
 const DEFAULT_HEADERS = 'Cache-Control: no-cache, no-store, must-revalidate';
 
 /**
  * Render PDF
  */
 function renderPDF({ options }, done) {
+  // Remove print stylesheets prior rendering
+  if (options.removePrintMedia) {
+    const selector = 'document.querySelectorAll(\'link[rel="stylesheet"][media="print"]\')';
+    const code = `Array.prototype.forEach.call(${selector}, s => s.remove());`;
+    this.webContents.executeJavaScript(code);
+  }
+
   this.webContents.printToPDF(options, done);
 }
 
@@ -47,38 +56,13 @@ function renderImage({ type, options }, done) {
 }
 
 /**
- * Handle loading failure errors
- */
-function handleLoadingError(done, e, code, desc) {
-  switch (code) {
-    case -105:
-      done({ statusCode: 500, code: 'NAME_NOT_RESOLVED',
-        message: `The host name could not be resolved.` });
-      break;
-    case -300:
-      done({ statusCode: 500, code: 'INVALID_URL', message: 'The URL is invalid.' });
-      break;
-    case -501:
-      done({ statusCode: 500, code: 'INSECURE_RESPONSE',
-        message: 'The server\'s response was insecure (e.g. there was a cert error).' });
-      break;
-    case -3:
-      done({ statusCode: 500, code: 'ABORTED', message: 'User aborted loading.' });
-      break;
-    default:
-      done({ statusCode: 500, code: 'GENERIC_ERROR', message: `${code} - ${desc}` });
-  }
-}
-
-/**
  * Render job with error handling
  */
 export function renderWorker(window, task, done) {
   const { webContents } = window;
 
-  // Prevent loading of malicious chrome:// URLS
   if (task.url.startsWith('chrome://')) {
-    return done({ statusCode: 500, code: 'INVALID_URL', message: 'The URL is invalid.' });
+    return done(new RendererError('INVALID_URL', 'chrome:// urls are forbidden.'));
   }
 
   const timeoutTimer = setTimeout(() => webContents.emit('timeout'), TIMEOUT * 1000);
@@ -86,24 +70,12 @@ export function renderWorker(window, task, done) {
   webContents.once('finished', (type, ...args) => {
     clearTimeout(timeoutTimer);
 
-    switch (type) {
-      // Loading failures
-      case 'did-fail-load': handleLoadingError(done, ...args);
-        break;
-      // Renderer process has crashed
-      case 'crashed':
-        done({ statusCode: 500, code: 'RENDERER_CRASH', message: `Render process crashed.` });
-        break;
-      // Page loading timed out
-      case 'timeout':
-        done({ statusCode: 524, code: 'RENDERER_TIMEOUT', message: `Renderer timed out.` });
-        break;
-      // Page loaded successfully
-      case 'did-finish-load':
+    validateResult(task.url, type, ...args)
+      .then(() => {
+        // Page loaded successfully
         (task.type === 'pdf' ? renderPDF : renderImage).call(window, task, done);
-        break;
-      default: done({ statusCode: 500, code: 'UNKNOWN_EVENT', message: type });
-    }
+      })
+      .catch(ex => done(ex));
   });
 
   webContents.loadURL(task.url, { extraHeaders: DEFAULT_HEADERS });
@@ -115,9 +87,11 @@ export function renderWorker(window, task, done) {
 export function createWindow() {
   const window = new BrowserWindow({
     width: WINDOW_WIDTH, height: WINDOW_HEIGHT,
-    frame: false, show: false,
+    frame: DEVELOPMENT, show: DEVELOPMENT,
     webPreferences: {
       blinkFeatures: 'OverlayScrollbars', // Slimmer scrollbars
+      allowDisplayingInsecureContent: true, // Show http content on https site
+      allowRunningInsecureContent: true, // Run JS, CSS from http urls
     },
   });
 

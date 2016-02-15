@@ -6,7 +6,7 @@ export function printBootMessage(listener) {
   const { port, address } = listener.address();
   const url = `http://${address}:${port}`;
   process.stdout.write(`Renderer listening on ${url}\n\n`);
-  process.stdout.write(printUsage(undefined, url) + '\n');
+  process.stdout.write(`${printUsage(undefined, url)}\n`);
 }
 
 /**
@@ -22,7 +22,7 @@ export function handleErrors(err, req, res) {
     },
   });
 
-  if (err instanceof Error) process.stderr.write(err + '\n');
+  if (err instanceof Error) process.stderr.write(`${err}\n`);
 
   return true;
 }

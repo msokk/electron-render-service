@@ -15,6 +15,9 @@ Based on official [Node.js Jessie](https://hub.docker.com/_/node/) image, uses l
 1. `docker run -t -e RENDERER_ACCESS_KEY=secret -p 3000:3000 msokk/electron-render-service`
 2. `wget -o out.pdf http://<node_address>:3000/pdf?url=https://github.com/msokk/electron-render-service&access_key=secret`
 
+> Note: Add `--security-opt seccomp:unconfined` to supress `libudev: udev_has_devtmpfs: name_to_handle_at on /dev: Operation not permitted` warning.
+
+
 
 ## Installation on Debian with Node.js
 
@@ -23,7 +26,7 @@ Based on official [Node.js Jessie](https://hub.docker.com/_/node/) image, uses l
 sed -i 's/main/main contrib/g' /etc/apt/sources.list
 
 # Install packages needed for runtime
-apt-get update && apt-get install -y xvfb libgtk2.0-0 ttf-mscorefonts-installer libnotify4 libgconf2-4 libnss3
+apt-get update && apt-get install -y xvfb libgtk2.0-0 ttf-mscorefonts-installer libnotify4 libgconf2-4 libnss3 dbus-x11
 
 # Install from NPM
 npm install -g electron-render-service
@@ -47,6 +50,7 @@ wget -o out.pdf http://localhost:3000/pdf?url=https://github.com/msokk/electron-
   * `marginsType` - Specify the type of margins to use (default: `0`)
   * `printBackground` - Whether to print CSS backgrounds. (default: `true`)
   * `landscape` -  `true` for landscape, `false` for portrait. (default: `false`)
+  * `removePrintMedia` - Removes any `<link media="print">` stylesheets on page before render. (default: `false`)
 
 #### `GET /png|jpeg` - Render PNG/JPEG
 

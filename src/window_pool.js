@@ -66,7 +66,7 @@ export default class WindowPool {
 
     renderWorker(window, task, (...args) => {
       // Load blank state after render
-      window.loadURL('about:blank');
+      if (process.env.NODE_ENV !== 'development') window.loadURL('about:blank');
 
       window.unlock();
       done(...args);

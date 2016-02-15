@@ -25,10 +25,11 @@ app.enable('trust proxy');
  * GET /pdf - Render PDF
  *
  * Query params: https://github.com/atom/electron/blob/master/docs/api/web-contents.md#webcontentsprinttopdfoptions-callback
+ * removePrintMedia - removes <link media="print"> stylesheets
  */
 app.get('/pdf', auth, (req, res) => {
   const {
-    url = 'data:text/plain;charset=utf-8,' + printUsage('pdf'),
+    url = `data:text/plain;charset=utf-8,${printUsage('pdf')}`, removePrintMedia = 'false',
     marginsType = 0, pageSize = 'A4', printBackground = 'true', landscape = 'false',
   } = req.query;
 
@@ -38,6 +39,7 @@ app.get('/pdf', auth, (req, res) => {
       marginsType: parseInt(marginsType, 10),
       landscape: landscape === 'true',
       printBackground: printBackground === 'true',
+      removePrintMedia: removePrintMedia === 'true',
     },
   }, (err, buffer) => {
     if (handleErrors(err, req, res)) return;
@@ -56,7 +58,7 @@ app.get('/pdf', auth, (req, res) => {
  */
 app.get(/^\/(png|jpeg)/, auth, (req, res) => {
   const type = req.params[0];
-  const { url = 'data:text/plain;charset=utf-8,' + printUsage(type) } = req.query;
+  const { url = `data:text/plain;charset=utf-8,${printUsage(type)}` } = req.query;
 
   req.app.pool.enqueue({ url, type, options: req.query }, (err, buffer) => {
     if (handleErrors(err, req, res)) return;
