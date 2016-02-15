@@ -13,7 +13,7 @@ WORKDIR /app
 # Install the packages needed to run Electron
 RUN npm install --production && \
     sed -i 's/main/main contrib/g' /etc/apt/sources.list && \
-    apt-get update && apt-get upgrade && apt-get install -y xvfb \
+    apt-get update && apt-get upgrade -y && apt-get install -y xvfb \
       libgtk2.0-0 ttf-mscorefonts-installer libnotify4 libgconf2-4 libnss3 dbus-x11 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 

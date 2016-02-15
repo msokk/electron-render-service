@@ -15,6 +15,8 @@ Based on official [Node.js Jessie](https://hub.docker.com/_/node/) image, uses l
 1. `docker run -t -e RENDERER_ACCESS_KEY=secret -p 3000:3000 msokk/electron-render-service`
 2. `wget -o out.pdf http://<node_address>:3000/pdf?url=https://github.com/msokk/electron-render-service&access_key=secret`
 
+> NB: Set bigger tmp filesystem size `--shm-size=Xm` (default: `64m`) if dealing with very heavy pages.
+
 > Note: Add `--security-opt seccomp:unconfined` to supress `libudev: udev_has_devtmpfs: name_to_handle_at on /dev: Operation not permitted` warning.
 
 
