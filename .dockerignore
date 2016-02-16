@@ -6,5 +6,7 @@
 dev.js
 npm-debug.log
 
+bin/
+test/
 src/
 node_modules/

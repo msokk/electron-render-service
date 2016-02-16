@@ -1,13 +1,12 @@
 {
   "name": "electron-render-service",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Microservice for rendering PDF/PNG/JPEG from HTML with Electron",
   "bin": {
     "electron-render-service": "./bin/electron-render-service.js"
   },
   "scripts": {
-    "start": "electron lib/server.js",
-    "dev": "electron dev.js",
+    "start": "electron dev.js",
     "build": "babel src -d lib",
     "lint": "eslint src",
     "test": "mocha --compilers js:babel-register"

@@ -9,7 +9,7 @@ Simple PDF/PNG/JPEG render service, accepts webpage URL and returns the resource
 
 ## Docker usage
 
-Based on official [Node.js Jessie](https://hub.docker.com/_/node/) image, uses latest [electron](https://github.com/atom/electron).
+Based on official [Debian Jessie](https://hub.docker.com/_/debian/) image, uses latest [electron](https://github.com/atom/electron).
 
 
 1. `docker run -t -e RENDERER_ACCESS_KEY=secret -p 3000:3000 msokk/electron-render-service`
