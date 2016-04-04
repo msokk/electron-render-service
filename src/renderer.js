@@ -1,9 +1,11 @@
 import pjson from '../package.json';
 import { BrowserWindow } from 'electron';
+import retry from 'retry';
 
 import { validateResult, RendererError } from './error_handler';
 
 const TIMEOUT = process.env.TIMEOUT || 30;
+const DELAY = process.env.DELAY || 1;
 const WINDOW_WIDTH = parseInt(process.env.WINDOW_WIDTH, 10) || 1024;
 const WINDOW_HEIGHT = parseInt(process.env.WINDOW_HEIGHT, 10) || 768;
 const LIMIT = 3000; // Constrain screenshots to 3000x3000px
@@ -67,15 +69,59 @@ export function renderWorker(window, task, done) {
 
   const timeoutTimer = setTimeout(() => webContents.emit('timeout'), TIMEOUT * 1000);
 
+  if (task.options.waitForText !== false) {
+    var waitOperation = retry.operation({
+      retries: Math.round(TIMEOUT / 1000),
+      factor: 1,
+      minTimeout: 750,
+      maxTimeout: 1000
+    })
+  }
+
   webContents.once('finished', (type, ...args) => {
     clearTimeout(timeoutTimer);
 
-    validateResult(task.url, type, ...args)
-      .then(() => {
-        // Page loaded successfully
-        (task.type === 'pdf' ? renderPDF : renderImage).call(window, task, done);
+    function renderIt() {
+      validateResult(task.url, type, ...args)
+        .then(() => {
+          // Page loaded successfully
+          (task.type === 'pdf' ? renderPDF : renderImage).call(window, task, done);
+        })
+        .catch(ex => done(ex));
+    }
+
+    if (task.options.delay > 0) {
+      console.log('delaying pdf generation by ', task.options.delay * 1000)
+      setTimeout(renderIt, task.options.delay * 1000);
+    }
+    else if (task.options.waitForText) {
+      console.log('delaying pdf generation, waiting for "' + task.options.waitForText + '" to appear')
+      waitOperation.attempt(function(currentAttempt) {
+        webContents.findInPage(task.options.waitForText);
       })
-      .catch(ex => done(ex));
+      
+      webContents.on('found-in-page', function(event, result) {
+        if (!task.options.waitForText) {
+          return;
+        }
+
+        if (result.matches == 0)  {
+          return waitOperation.retry(new Error('not ready to render'));
+        }
+
+        if (result.finalUpdate) {
+          webContents.stopFindInPage("clearSelection");
+        }
+
+        if (result.finalUpdate && result.matches > 0) {
+          renderIt();
+        }
+      });
+    }
+    else {
+      renderIt();
+    }
+
   });
 
   webContents.loadURL(task.url, { extraHeaders: DEFAULT_HEADERS });
