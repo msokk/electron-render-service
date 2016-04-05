@@ -68,61 +68,66 @@ export function renderWorker(window, task, done) {
   }
 
   const timeoutTimer = setTimeout(() => webContents.emit('timeout'), TIMEOUT * 1000);
+  var timeoutHit = false
+
+  console.log('render worker')
+  var renderType
 
   if (task.options.waitForText !== false) {
     var waitOperation = retry.operation({
-      retries: Math.round(TIMEOUT / 1000),
+      retries: TIMEOUT,
       factor: 1,
       minTimeout: 750,
       maxTimeout: 1000
     })
   }
+  
+  function renderIt(task, type, ...args) {
+    clearTimeout(timeoutTimer);
 
-  webContents.once('finished', (type, ...args) => {
-    function renderIt() {
-      clearTimeout(timeoutTimer);
+    validateResult(task.url, type)
+      .then(() => {
+        // Page loaded successfully
+        (task.type === 'pdf' ? renderPDF : renderImage).call(window, task, done);
+      })
+      .catch(ex => done(ex));
+  }
 
-      validateResult(task.url, type, ...args)
-        .then(() => {
-          // Page loaded successfully
-          (task.type === 'pdf' ? renderPDF : renderImage).call(window, task, done);
-        })
-        .catch(ex => done(ex));
-    }
+  webContents.on('timeout', function() {
+    done(new Error('timeout was hit'))
+  })
 
+  webContents.once('finished', (type) => {
     if (task.options.delay > 0) {
       console.log('delaying pdf generation by ', task.options.delay * 1000)
-      setTimeout(renderIt, task.options.delay * 1000);
+      setTimeout(renderIt.bind(null, task, type), task.options.delay * 1000);
     }
     else if (task.options.waitForText && task.options.waitForText !== 'false' && task.options.waitForText !== false) {
       console.log('delaying pdf generation, waiting for "' + task.options.waitForText + '" to appear')
+
       waitOperation.attempt(function(currentAttempt) {
+        console.log('attempting to find text', currentAttempt)
+
+        webContents.once('found-in-page', function(event, result) {
+          if (result.finalUpdate && result.matches > 0 || result.finalUpdate == false && result.activeMatchOrdinal > 0) {
+            webContents.stopFindInPage('clearSelection');
+            return renderIt(task, type);
+          }
+          
+          if (waitOperation.retry(new Error('not ready to render'))) {
+            return;
+          }
+        });
+
         webContents.findInPage(task.options.waitForText);
       })
-      
-      webContents.on('found-in-page', function(event, result) {
-        if (!task.options.waitForText) {
-          return;
-        }
-
-        if (result.matches == 0)  {
-          return waitOperation.retry(new Error('not ready to render'));
-        }
-
-        if (result.finalUpdate) {
-          webContents.stopFindInPage("clearSelection");
-        }
-
-        if (result.finalUpdate && result.matches > 0) {
-          renderIt();
-        }
-      });
     }
     else {
-      renderIt();
+      renderIt(task, type);
     }
-
   });
+
+  
 
   webContents.loadURL(task.url, { extraHeaders: DEFAULT_HEADERS });
 }
