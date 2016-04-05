@@ -79,9 +79,9 @@ export function renderWorker(window, task, done) {
   }
 
   webContents.once('finished', (type, ...args) => {
-    clearTimeout(timeoutTimer);
-
     function renderIt() {
+      clearTimeout(timeoutTimer);
+
       validateResult(task.url, type, ...args)
         .then(() => {
           // Page loaded successfully
@@ -94,7 +94,7 @@ export function renderWorker(window, task, done) {
       console.log('delaying pdf generation by ', task.options.delay * 1000)
       setTimeout(renderIt, task.options.delay * 1000);
     }
-    else if (task.options.waitForText) {
+    else if (task.options.waitForText && task.options.waitForText !== 'false' && task.options.waitForText !== false) {
       console.log('delaying pdf generation, waiting for "' + task.options.waitForText + '" to appear')
       waitOperation.attempt(function(currentAttempt) {
         webContents.findInPage(task.options.waitForText);
