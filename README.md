@@ -1,4 +1,5 @@
 # electron-render-service
+[![Build Status](https://travis-ci.org/msokk/electron-render-service.svg?branch=master)](https://travis-ci.org/msokk/electron-render-service)
 [![Docker Hub](https://img.shields.io/badge/docker-ready-blue.svg)](https://registry.hub.docker.com/u/msokk/electron-render-service/)
 [![ImageLayers Size](https://img.shields.io/imagelayers/image-size/msokk/electron-render-service/latest.svg)]()
 [![npm](https://img.shields.io/npm/v/electron-render-service.svg)](https://www.npmjs.com/package/electron-render-service)
