@@ -41,7 +41,7 @@ export default class WindowPool {
    */
   createPool(concurrency) {
     let n = concurrency;
-    const setBusy = (id, value) => this.windowPool[id].busy = value;
+    const setBusy = (id, value) => { this.windowPool[id].busy = value; };
 
     while (n-- > 0) {
       const window = createWindow();

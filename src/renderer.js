@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import pjson from '../package.json';
 import { BrowserWindow } from 'electron';
 import retry from 'retry';
@@ -5,7 +6,6 @@ import retry from 'retry';
 import { validateResult, RendererError } from './error_handler';
 
 const TIMEOUT = process.env.TIMEOUT || 30;
-const DELAY = process.env.DELAY || 1;
 const WINDOW_WIDTH = parseInt(process.env.WINDOW_WIDTH, 10) || 1024;
 const WINDOW_HEIGHT = parseInt(process.env.WINDOW_HEIGHT, 10) || 768;
 const LIMIT = 3000; // Constrain screenshots to 3000x3000px
@@ -39,7 +39,7 @@ function renderImage({ type, options }, done) {
   const rect = {};
   Object.keys(options).map(k => [k, options[k]])
     .filter(([k, v]) => validKeys.includes(k) && !isNaN(parseInt(v, 10)))
-    .forEach(([k, v]) => rect[k] = parseInt(v, 10));
+    .forEach(([k, v]) => { rect[k] = parseInt(v, 10); });
 
   // Use explicit browser size or rect size, capped by LIMIT, default to ENV variable
   const browserSize = {
@@ -62,20 +62,20 @@ function renderImage({ type, options }, done) {
  */
 export function renderWorker(window, task, done) {
   const { webContents } = window;
+  let waitOperation = null;
 
   if (task.url.startsWith('chrome://')) {
-    return done(new RendererError('INVALID_URL', 'chrome:// urls are forbidden.'));
+    done(new RendererError('INVALID_URL', 'chrome:// urls are forbidden.'));
+    return;
   }
 
   const timeoutTimer = setTimeout(() => webContents.emit('timeout'), TIMEOUT * 1000);
 
   if (task.options.waitForText !== false) {
-    var waitOperation = retry.operation({
-      retries: Math.round(TIMEOUT / 1000),
-      factor: 1,
-      minTimeout: 750,
-      maxTimeout: 1000
-    })
+    waitOperation = retry.operation({
+      retries: TIMEOUT, factor: 1,
+      minTimeout: 750, maxTimeout: 1000,
+    });
   }
 
   webContents.once('finished', (type, ...args) => {
@@ -90,38 +90,32 @@ export function renderWorker(window, task, done) {
         .catch(ex => done(ex));
     }
 
+    // Delay rendering n seconds
     if (task.options.delay > 0) {
-      console.log('delaying pdf generation by ', task.options.delay * 1000)
+      console.log('delaying pdf generation by %sms', task.options.delay * 1000);
       setTimeout(renderIt, task.options.delay * 1000);
-    }
-    else if (task.options.waitForText) {
-      console.log('delaying pdf generation, waiting for "' + task.options.waitForText + '" to appear')
-      waitOperation.attempt(function(currentAttempt) {
-        webContents.findInPage(task.options.waitForText);
-      })
-      
-      webContents.on('found-in-page', function(event, result) {
-        if (!task.options.waitForText) {
+    // Look for specific string before rendering
+    } else if (task.options.waitForText) {
+      console.log('delaying pdf generation, waiting for text "%s" to appear',
+        task.options.waitForText);
+
+      waitOperation.attempt(() => webContents.findInPage(task.options.waitForText));
+
+      webContents.on('found-in-page', function foundInPage(event, result) {
+        if (result.matches === 0) {
+          waitOperation.retry(new Error('not ready to render'));
           return;
         }
 
-        if (result.matches == 0)  {
-          return waitOperation.retry(new Error('not ready to render'));
-        }
-
         if (result.finalUpdate) {
-          webContents.stopFindInPage("clearSelection");
-        }
-
-        if (result.finalUpdate && result.matches > 0) {
+          webContents.stopFindInPage('clearSelection');
+          webContents.removeListener('found-in-page', foundInPage);
           renderIt();
         }
       });
-    }
-    else {
+    } else {
       renderIt();
     }
-
   });
 
   webContents.loadURL(task.url, { extraHeaders: DEFAULT_HEADERS });

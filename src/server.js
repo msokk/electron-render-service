@@ -30,7 +30,8 @@ app.enable('trust proxy');
 app.get('/pdf', auth, (req, res) => {
   const {
     url = `data:text/plain;charset=utf-8,${printUsage('pdf')}`, removePrintMedia = 'false',
-    marginsType = 0, pageSize = 'A4', printBackground = 'true', landscape = 'false', delay = 0, waitForText = 'false'
+    marginsType = 0, pageSize = 'A4', printBackground = 'true', landscape = 'false', delay = 0,
+    waitForText = 'false',
   } = req.query;
 
   req.app.pool.enqueue({ url, type: 'pdf',
@@ -41,7 +42,7 @@ app.get('/pdf', auth, (req, res) => {
       printBackground: printBackground === 'true',
       removePrintMedia: removePrintMedia === 'true',
       delay: parseInt(delay, 10),
-      waitForText: waitForText ? waitForText : false
+      waitForText: waitForText !== 'false' ? waitForText : false,
     },
   }, (err, buffer) => {
     if (handleErrors(err, req, res)) return;
@@ -76,8 +77,7 @@ app.get(/^\/(png|jpeg)/, auth, (req, res) => {
  */
 app.get('/stats', auth, (req, res) => {
   if (req.keyLabel !== 'global') return res.sendStatus(403);
-
-  res.send(req.app.pool.stats());
+  return res.send(req.app.pool.stats());
 });
 
 
