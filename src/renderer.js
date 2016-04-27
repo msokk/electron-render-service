@@ -67,7 +67,10 @@ export function renderWorker(window, task, done) {
     return done(new RendererError('INVALID_URL', 'chrome:// urls are forbidden.'));
   }
 
-  const timeoutTimer = setTimeout(() => webContents.emit('timeout'), TIMEOUT * 1000);
+  const timeoutTimer = setTimeout(function() {
+    webContents.emit('timeout')
+    done(new Error('timeout was hit'))
+  }, TIMEOUT * 1000);
   var timeoutHit = false
 
   console.log('render worker')
@@ -92,10 +95,6 @@ export function renderWorker(window, task, done) {
       })
       .catch(ex => done(ex));
   }
-
-  webContents.on('timeout', function() {
-    done(new Error('timeout was hit'))
-  })
 
   webContents.once('finished', (type) => {
     if (task.options.delay > 0) {
