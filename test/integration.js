@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { execSync } from 'child_process';
 import request from 'supertest';
 import express from 'express';
 import app, { electron } from '../src/server';
@@ -61,6 +62,8 @@ describe('integration', () => {
 
           if (res.body.compare(fixture) === 0) return;
 
+          fs.writeFileSync('./example_failed.png', res.body);
+          execSync('curl --upload-file ./example_failed.png https://transfer.sh/example_failed.png', { stdio: 'inherit' });
           throw new Error(`${examplePngPath} does not match rendered screenshot`);
         })
         .end(done);
