@@ -93,13 +93,13 @@ wget -o out.pdf http://localhost:3000/pdf?url=https://github.com/msokk/electron-
 * `HOSTNAME` - Hostname to accept Express connections on (default: `0.0.0.0`)
 * `PORT` - (default: `3000`)
 
-## Rendering issues in latest Electron (Chrome 47)
+## Rendering issues in latest Electron (Chrome 49)
 * [box-shadow is black in PDF](https://code.google.com/p/chromium/issues/detail?id=174583) - To keep the box shadow, add `-webkit-filter: blur(0);` rule next to it. Note that this rasterizes the whole layer, making large areas noticeably blurry. Or just hide the box shadow.
 * `border-radius` creates double width borders without rounded corners
 
 
 ## Delayed Rendering
 
-Not all content is loaded once the DOM is loaded, some data can take time because calls are being made via websockets and other methods. You can delay the rendering of the PDF by either providing a `delay` value in the query string or you can provide `waitForText` in the query string.
+Not all content is loaded once the DOM is loaded, some data can take time because calls are being made via websockets and other methods. You can delay the rendering by either providing a `delay` value in the query string or you can provide `waitForText` in the query string.
 
-If you specify `waitForText` the service will continually scan the loaded URL until the overall timeout is reached. If the text passed to the variable `waitForText` is found before the timeout, the PDF will generate and return.
+If you specify `waitForText` the service will continually scan the loaded URL until the overall timeout is reached. If the text passed to the variable `waitForText` is found before the timeout, the PDF/image will generate and return.

@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "async": "^1.5.2",
-    "electron-prebuilt": "^0.37.7",
+    "electron-prebuilt": "^0.37.8",
     "express": "^4.13.4",
     "express-validator": "^2.20.3",
     "morgan": "^1.7.0",
@@ -41,8 +41,8 @@
     "babel-eslint": "^6.0.4",
     "babel-preset-es2015-node5": "^1.2.0",
     "babel-register": "^6.7.2",
-    "eslint": "^2.8.0",
-    "eslint-config-airbnb-base": "^1.0.4",
+    "eslint": "^2.9.0",
+    "eslint-config-airbnb-base": "^2.0.0",
     "eslint-plugin-import": "^1.6.1",
     "supertest": "^1.2.0"
   }
