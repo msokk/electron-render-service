@@ -11,11 +11,17 @@ node_js:
   - "5.10"
 
 before_script:
+  - "mkdir -p ~/.docker && echo $DOCKER_AUTH > ~/.docker/config.json"
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
 
 script:
   - npm run lint
-  - docker build --rm=true --force-rm=true -t msokk/electron-render-service .
   - npm test
+
+after_success:
+  - export REPO=msokk/electron-render-service
+  - docker build -t $REPO .
+  - if [ ! -z "$TRAVIS_TAG" ]; then docker tag $REPO:latest $REPO:$TRAVIS_TAG; fi
+  - docker push $REPO
