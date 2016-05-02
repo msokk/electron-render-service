@@ -6,6 +6,17 @@ import { renderWorker, createWindow } from './renderer';
  */
 export default class WindowPool {
   /**
+   * Create Electron window pool
+   */
+  constructor() {
+    const concurrency = parseInt(process.env.CONCURRENCY, 10) || 1;
+
+    this.windowPool = {};
+    this.createPool(concurrency);
+    this.queue = async.queue(this.queueWorker.bind(this), concurrency);
+  }
+
+  /**
    * Push a render task to queue
    */
   enqueue(...args) {
@@ -72,16 +83,5 @@ export default class WindowPool {
       window.unlock();
       done(...args);
     });
-  }
-
-  /**
-   * Create Electron window pool
-   */
-  constructor() {
-    const concurrency = process.env.CONCURRENCY || 1;
-
-    this.windowPool = {};
-    this.createPool(concurrency);
-    this.queue = async.queue(this.queueWorker.bind(this), concurrency);
   }
 }

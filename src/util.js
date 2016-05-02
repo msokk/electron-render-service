@@ -1,5 +1,5 @@
 export function printUsage(type = '[pdf|png|jpeg]', url = '') {
-  return `Usage: GET ${url}/${type}?url=http://google.com&access_key=[token]`;
+  return `Usage: GET ${url}/${type}?url=http://google.com&accessKey=[token]`;
 }
 
 export function printBootMessage(listener) {

@@ -13,7 +13,7 @@ Based on official [Debian Jessie](https://hub.docker.com/_/debian/) image, uses 
 
 
 1. `docker run -t -e RENDERER_ACCESS_KEY=secret -p 3000:3000 msokk/electron-render-service`
-2. `wget -o out.pdf http://<node_address>:3000/pdf?url=https://github.com/msokk/electron-render-service&access_key=secret`
+2. `wget -o out.pdf http://<node_address>:3000/pdf?url=https://github.com/msokk/electron-render-service&accessKey=secret`
 
 > NB: Set bigger shared memory size `--shm-size=Xm` (default: `64m`) if dealing with very heavy pages.
 
@@ -36,7 +36,7 @@ npm install -g electron-render-service
 # Run in virtual framebuffer
 RENDERER_ACCESS_KEY=secret xvfb-run --server-args="-screen 0 1024x768x24" electron-render-service
 
-wget -o out.pdf http://localhost:3000/pdf?url=https://github.com/msokk/electron-render-service&access_key=secret
+wget -o out.pdf http://localhost:3000/pdf?url=https://github.com/msokk/electron-render-service&accessKey=secret
 ```
 
 
@@ -46,7 +46,7 @@ wget -o out.pdf http://localhost:3000/pdf?url=https://github.com/msokk/electron-
 
 *Query params ([About PDF params](https://github.com/atom/electron/blob/master/docs/api/web-contents.md#webcontentsprinttopdfoptions-callback)):*
 
-  * `access_key` - Authentication key.
+  * `accessKey` - Authentication key.
   * `url` - Full URL to fetch.
   * `pageSize` - Specify page size of the generated PDF. (default: `A4`)
   * `marginsType` - Specify the type of margins to use (default: `0`)
@@ -60,22 +60,24 @@ wget -o out.pdf http://localhost:3000/pdf?url=https://github.com/msokk/electron-
 
 *Query params:*
 
-  * `access_key` - Authentication key.
+  * `accessKey` - Authentication key.
   * `url` - Full URL to fetch.
   * `quality` - JPEG quality. (default: `80`)
+  * `delay` - Specify how long to wait before generating the image (default: `0`)
+  * `waitForText` - Specify a specific string of text to find before generating the image (default: `false`)
   * `browserWidth` - Browser window width (default: `rect.width || env.WINDOW_WIDTH`, max: `3000`)
   * `browserHeight` - Browser window height (default: `rect.height || env.WINDOW_HEIGHT`, max: `3000`)
   * Clipping rectangle (optional, but all 4 integers need to be set)
-    * `x`
-    * `y`
-    * `width`
-    * `height`
+    * `clippingRect[x]`
+    * `clippingRect[y]`
+    * `clippingRect[width]`
+    * `clippingRect[height]`
 
 #### `GET /stats` - Display render pool stats
 
 *Query params:*
 
-* `access_key` - Generic authentication key is required.
+* `accessKey` - Generic authentication key is required.
 
 
 ## Environment variables
@@ -88,7 +90,7 @@ wget -o out.pdf http://localhost:3000/pdf?url=https://github.com/msokk/electron-
 * `TIMEOUT` - Number of seconds before request timeouts (default: `30`)
 * `WINDOW_WIDTH` - Default window width (default: `1024`)
 * `WINDOW_HEIGHT` - Default window height (default: `768`)
-* `INTERFACE` - Network interface for Express to listen on (default: `0.0.0.0`)
+* `HOSTNAME` - Hostname to accept Express connections on (default: `0.0.0.0`)
 * `PORT` - (default: `3000`)
 
 ## Rendering issues in latest Electron (Chrome 47)

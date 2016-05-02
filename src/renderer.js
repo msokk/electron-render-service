@@ -3,19 +3,18 @@ import pjson from '../package.json';
 import { BrowserWindow } from 'electron'; // eslint-disable-line import/no-unresolved
 import retry from 'retry';
 
-import { validateResult, RendererError } from './error_handler';
+import { validateResult } from './error_handler';
 
-const TIMEOUT = process.env.TIMEOUT || 30;
+const TIMEOUT = parseInt(process.env.TIMEOUT, 10) || 30;
+const DEVELOPMENT = process.env.NODE_ENV === 'development';
 const WINDOW_WIDTH = parseInt(process.env.WINDOW_WIDTH, 10) || 1024;
 const WINDOW_HEIGHT = parseInt(process.env.WINDOW_HEIGHT, 10) || 768;
-const LIMIT = 3000; // Constrain screenshots to 3000x3000px
-const DEVELOPMENT = process.env.NODE_ENV === 'development';
 const DEFAULT_HEADERS = 'Cache-Control: no-cache, no-store, must-revalidate\nPragma: no-cache';
 
 /**
  * Render PDF
  */
-function renderPDF({ options }, done) {
+function renderPDF(options, done) {
   // Remove print stylesheets prior rendering
   if (options.removePrintMedia) {
     const selector = 'document.querySelectorAll(\'link[rel="stylesheet"][media="print"]\')';
@@ -27,32 +26,17 @@ function renderPDF({ options }, done) {
 }
 
 /**
- * Render image
+ * Render image png/jpeg
  */
-function renderImage({ type, options }, done) {
-  const handleCapture = image => {
-    done(null, type === 'png' ? image.toPng() : image.toJpeg(parseInt(options.quality, 10) || 80));
-  };
+function renderImage({ type, quality, browserWidth, browserHeight, clippingRect }, done) {
+  const handleCapture = image => done(null, type === 'png' ? image.toPng() : image.toJpeg(quality));
 
-  // Sanitize rect
-  const validKeys = ['x', 'y', 'width', 'height'];
-  const rect = {};
-  Object.keys(options).map(k => [k, options[k]])
-    .filter(([k, v]) => validKeys.includes(k) && !isNaN(parseInt(v, 10)))
-    .forEach(([k, v]) => { rect[k] = parseInt(v, 10); });
-
-  // Use explicit browser size or rect size, capped by LIMIT, default to ENV variable
-  const browserSize = {
-    width: Math.min(parseInt(options.browserWidth, 10) || rect.width, LIMIT) || WINDOW_WIDTH,
-    height: Math.min(parseInt(options.browserHeight, 10) || rect.height, LIMIT) || WINDOW_HEIGHT,
-  };
-
-  if (Object.keys(rect).length === 4) {
+  if (clippingRect) {
     // Avoid stretching by adding rect coordinates to size
-    this.setSize(browserSize.width + rect.x, browserSize.height + rect.y);
-    setTimeout(() => this.capturePage(rect, handleCapture), 50);
+    this.setSize(browserWidth + clippingRect.x, browserHeight + clippingRect.y);
+    setTimeout(() => this.capturePage(clippingRect, handleCapture), 50);
   } else {
-    this.setSize(browserSize.width, browserSize.height);
+    this.setSize(browserWidth, browserHeight);
     setTimeout(() => this.capturePage(handleCapture), 50);
   }
 }
@@ -64,18 +48,11 @@ export function renderWorker(window, task, done) {
   const { webContents } = window;
   let waitOperation = null;
 
-  if (task.url.startsWith('chrome://')) {
-    done(new RendererError('INVALID_URL', 'chrome:// urls are forbidden.'));
-    return;
-  }
-
   const timeoutTimer = setTimeout(() => webContents.emit('timeout'), TIMEOUT * 1000);
 
-  if (task.options.waitForText !== false) {
-    waitOperation = retry.operation({
-      retries: TIMEOUT, factor: 1,
-      minTimeout: 750, maxTimeout: 1000,
-    });
+  if (task.waitForText !== false) {
+    waitOperation = retry.operation({ retries: TIMEOUT, factor: 1,
+      minTimeout: 750, maxTimeout: 1000 });
   }
 
   webContents.once('finished', (type, ...args) => {
@@ -83,23 +60,20 @@ export function renderWorker(window, task, done) {
 
     function renderIt() {
       validateResult(task.url, type, ...args)
-        .then(() => {
-          // Page loaded successfully
-          (task.type === 'pdf' ? renderPDF : renderImage).call(window, task, done);
-        })
+        // Page loaded successfully
+        .then(() => (task.type === 'pdf' ? renderPDF : renderImage).call(window, task, done))
         .catch(ex => done(ex));
     }
 
     // Delay rendering n seconds
-    if (task.options.delay > 0) {
-      console.log('delaying pdf generation by %sms', task.options.delay * 1000);
-      setTimeout(renderIt, task.options.delay * 1000);
-    // Look for specific string before rendering
-    } else if (task.options.waitForText) {
-      console.log('delaying pdf generation, waiting for text "%s" to appear',
-        task.options.waitForText);
+    if (task.delay > 0) {
+      console.log('delaying pdf generation by %sms', task.delay * 1000);
+      setTimeout(renderIt, task.delay * 1000);
 
-      waitOperation.attempt(() => webContents.findInPage(task.options.waitForText));
+    // Look for specific string before rendering
+    } else if (task.waitForText) {
+      console.log('delaying pdf generation, waiting for text "%s" to appear', task.waitForText);
+      waitOperation.attempt(() => webContents.findInPage(task.waitForText));
 
       webContents.on('found-in-page', function foundInPage(event, result) {
         if (result.matches === 0) {

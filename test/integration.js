@@ -1,9 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import request from 'supertest';
+import express from 'express';
 import app, { electron } from '../src/server';
 
 const fixturePath = path.join(__dirname, 'fixtures');
+const fixtureServer = express();
+fixtureServer.use(express.static(fixturePath));
+fixtureServer.listen(3001);
 
 const parseBuffer = (res, fn) => { // Superagent does not detect PDF
   const data = [];
@@ -33,7 +37,7 @@ describe('integration', () => {
     it('should print empty stats', done => {
       request(app)
         .get('/stats')
-        .query({ access_key: process.env.RENDERER_ACCESS_KEY })
+        .query({ accessKey: process.env.RENDERER_ACCESS_KEY })
         .set('Accept', 'application/json')
         .expect(200, {
           concurrency: 1,
@@ -49,7 +53,7 @@ describe('integration', () => {
 
       request(app)
         .get('/png')
-        .query({ access_key: process.env.RENDERER_ACCESS_KEY, url: `file://${path.join(fixturePath, 'example.html')}` })
+        .query({ accessKey: process.env.RENDERER_ACCESS_KEY, url: 'http://localhost:3001/example.html' })
         .expect(res => {
           const examplePngPath = path.join(fixturePath, 'example.png');
 
@@ -68,7 +72,7 @@ describe('integration', () => {
 
       request(app)
         .get('/png')
-        .query({ access_key: process.env.RENDERER_ACCESS_KEY, url: 'http://acid2.acidtests.org/#top' })
+        .query({ accessKey: process.env.RENDERER_ACCESS_KEY, url: 'http://acid2.acidtests.org/#top' })
         .expect(res => {
           const acidPngPath = path.join(fixturePath, 'acid2.png');
           const fixture = fs.readFileSync(acidPngPath);
@@ -88,7 +92,7 @@ describe('integration', () => {
       request(app)
         .get('/pdf')
         .parse(parseBuffer) // Superagent does not detect PDF
-        .query({ access_key: process.env.RENDERER_ACCESS_KEY, url: `file://${path.join(fixturePath, 'example.html')}` })
+        .query({ accessKey: process.env.RENDERER_ACCESS_KEY, url: 'http://localhost:3001/example.html' })
         .expect(res => {
           const examplePdfPath = path.join(fixturePath, 'example.pdf');
           const fixture = fs.readFileSync(examplePdfPath);
