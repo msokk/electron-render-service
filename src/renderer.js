@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import pjson from '../package.json';
-import { BrowserWindow } from 'electron';
+import { BrowserWindow } from 'electron'; // eslint-disable-line import/no-unresolved
 import retry from 'retry';
 
 import { validateResult, RendererError } from './error_handler';
@@ -10,7 +10,7 @@ const WINDOW_WIDTH = parseInt(process.env.WINDOW_WIDTH, 10) || 1024;
 const WINDOW_HEIGHT = parseInt(process.env.WINDOW_HEIGHT, 10) || 768;
 const LIMIT = 3000; // Constrain screenshots to 3000x3000px
 const DEVELOPMENT = process.env.NODE_ENV === 'development';
-const DEFAULT_HEADERS = 'Cache-Control: no-cache, no-store, must-revalidate';
+const DEFAULT_HEADERS = 'Cache-Control: no-cache, no-store, must-revalidate\nPragma: no-cache';
 
 /**
  * Render PDF

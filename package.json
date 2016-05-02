@@ -9,7 +9,7 @@
     "start": "electron dev.js",
     "build": "babel src -d lib",
     "lint": "eslint src",
-    "test": "mocha --compilers js:babel-register"
+    "test": "electron $(which _mocha) --compilers js:babel-register"
   },
   "keywords": [
     "electron",
@@ -29,19 +29,20 @@
   },
   "dependencies": {
     "async": "^1.5.2",
-    "electron-prebuilt": "^0.37.4",
+    "electron-prebuilt": "^0.37.7",
     "express": "^4.13.4",
     "morgan": "^1.7.0",
     "response-time": "^2.3.1",
     "retry": "^0.9.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.6.5",
-    "babel-eslint": "^6.0.2",
+    "babel-cli": "^6.7.7",
+    "babel-eslint": "^6.0.4",
     "babel-preset-es2015-node5": "^1.2.0",
-    "babel-register": "^6.6.5",
-    "eslint": "^2.7.0",
-    "eslint-config-airbnb": "^6.2.0",
-    "mocha": "^2.4.5"
+    "babel-register": "^6.7.2",
+    "eslint": "^2.8.0",
+    "eslint-config-airbnb-base": "^1.0.4",
+    "eslint-plugin-import": "^1.6.1",
+    "supertest": "^1.2.0"
   }
 }

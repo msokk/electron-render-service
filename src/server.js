@@ -1,7 +1,10 @@
 import express from 'express';
 import morgan from 'morgan';
 import responseTime from 'response-time';
-import { app as electronApp } from 'electron';
+import { app as electronApp } from 'electron'; // eslint-disable-line import/no-unresolved
+electronApp.commandLine.appendSwitch('disable-http-cache');
+electronApp.commandLine.appendSwitch('disable-gpu');
+
 
 import WindowPool from './window_pool';
 import auth from './auth';
@@ -90,7 +93,8 @@ app.get('/', (req, res) => {
 
 
 // Electron finished booting
-electronApp.on('ready', () => {
+electronApp.once('ready', () => {
+  electronApp.ready = true;
   app.pool = new WindowPool();
   const listener = app.listen(PORT, INTERFACE, () => printBootMessage(listener));
 });
@@ -101,3 +105,6 @@ process.on('exit', code => electronApp.exit(code));
 
 // Passthrough error handler to silence Electron prompt
 process.on('uncaughtException', err => { throw err; });
+
+export default app;
+export const electron = electronApp;

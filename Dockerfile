@@ -3,7 +3,7 @@ FROM buildpack-deps:jessie-curl
 MAINTAINER Mihkel Sokk <mihkelsokk@gmail.com>
 
 ENV RENDERER_ACCESS_KEY=changeme CONCURRENCY=1 WINDOW_WIDTH=1024 WINDOW_HEIGHT=768 NODE_ENV=production \
-    ELECTRON_VERSION=0.37.4 ELECTRON_ENABLE_STACK_DUMPING=true ELECTRON_ENABLE_LOGGING=true
+    ELECTRON_VERSION=0.37.7 ELECTRON_ENABLE_STACK_DUMPING=true ELECTRON_ENABLE_LOGGING=true
 
 WORKDIR /app
 EXPOSE 3000
@@ -24,7 +24,7 @@ RUN sed -i 's/main/main contrib/g' /etc/apt/sources.list && \
     unzip electron.zip && rm electron.zip && \
 
     # Cleanup
-    apt-get remove -y unzip && apt-get clean && rm -rf /var/lib/apt/lists/* 
+    apt-get remove -y unzip && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY package.json /app/package.json
 
@@ -32,6 +32,6 @@ RUN apt-get update && \
     apt-get install -y nodejs && \
     sed -i '/electron-prebuilt/d' ./package.json && \
     npm install --production && \
-    apt-get remove -y nodejs && apt-get clean && rm -rf /var/lib/apt/lists/* 
+    apt-get remove -y nodejs && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY . /app
