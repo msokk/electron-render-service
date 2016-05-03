@@ -9,7 +9,7 @@
     "start": "electron dev.js",
     "build": "babel src -d lib",
     "lint": "eslint src",
-    "test": "electron $(which _mocha) --compilers js:babel-register"
+    "test": "mocha --compilers js:babel-register"
   },
   "keywords": [
     "electron",

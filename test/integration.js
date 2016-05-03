@@ -1,14 +1,15 @@
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
-import request from 'supertest';
+import supertest from 'supertest';
 import express from 'express';
-import app, { electron } from '../src/server';
 
 const fixturePath = path.join(__dirname, 'fixtures');
 const fixtureServer = express();
 fixtureServer.use(express.static(fixturePath));
 fixtureServer.listen(3001);
+
+const request = supertest('http://localhost:3000');
 
 const parseBuffer = (res, fn) => { // Superagent does not detect PDF
   const data = [];
@@ -17,27 +18,16 @@ const parseBuffer = (res, fn) => { // Superagent does not detect PDF
 };
 
 describe('integration', () => {
-  before(function bootElectron(done) {
-    this.timeout(5000);
-    if (electron.ready) {
-      done();
-      return;
-    }
-
-    electron.on('ready', () => done);
-  });
-
   describe('GET /stats', () => {
     it('should disallow access without key', done => {
-      request(app)
+      request
         .get('/stats')
         .set('Accept', 'application/json')
         .expect(403, done);
     });
 
     it('should print empty stats', done => {
-      request(app)
-        .get('/stats')
+      request.get('/stats')
         .query({ accessKey: process.env.RENDERER_ACCESS_KEY })
         .set('Accept', 'application/json')
         .expect(200, {
@@ -52,12 +42,14 @@ describe('integration', () => {
     it('should render valid png from fixtures/example.html', function renderPng(done) {
       this.slow(10000);
 
-      request(app)
-        .get('/png')
+      request.get('/png')
         .query({ accessKey: process.env.RENDERER_ACCESS_KEY, url: 'http://localhost:3001/example.html' })
         .expect(res => {
-          const examplePngPath = path.join(fixturePath, 'example.png');
+          if (res.statusCode !== 200) {
+            throw new Error(`Invalid response code: ${res.statusCode}\n${res.body}`);
+          }
 
+          const examplePngPath = path.join(fixturePath, 'example.png');
           const fixture = fs.readFileSync(examplePngPath);
 
           if (res.body.compare(fixture) === 0) return;
@@ -73,15 +65,20 @@ describe('integration', () => {
       this.timeout(5000);
       this.slow(10000);
 
-      request(app)
-        .get('/png')
-        .query({ accessKey: process.env.RENDERER_ACCESS_KEY, url: 'http://acid2.acidtests.org/#top' })
+      request.get('/png')
+        .query({ accessKey: process.env.RENDERER_ACCESS_KEY, url: 'http://acid2.acidtests.org/#top', delay: 1 })
         .expect(res => {
+          if (res.statusCode !== 200) {
+            throw new Error(`Invalid response code: ${res.statusCode}\n${res.body}`);
+          }
+
           const acidPngPath = path.join(fixturePath, 'acid2.png');
           const fixture = fs.readFileSync(acidPngPath);
 
           if (res.body.compare(fixture) === 0) return;
 
+          fs.writeFileSync('./acid2_failed.png', res.body);
+          execSync('curl --upload-file ./acid2_failed.png https://transfer.sh/acid2_failed.png', { stdio: 'inherit' });
           throw new Error(`${acidPngPath} does not match rendered screenshot`);
         })
         .end(done);
@@ -92,16 +89,21 @@ describe('integration', () => {
     it('should render valid pdf from fixtures/example.html', function renderPdf(done) {
       this.slow(10000);
 
-      request(app)
-        .get('/pdf')
+      request.get('/pdf')
         .parse(parseBuffer) // Superagent does not detect PDF
         .query({ accessKey: process.env.RENDERER_ACCESS_KEY, url: 'http://localhost:3001/example.html' })
         .expect(res => {
+          if (res.statusCode !== 200) {
+            throw new Error(`Invalid response code: ${res.statusCode}\n${res.body}`);
+          }
+
           const examplePdfPath = path.join(fixturePath, 'example.pdf');
           const fixture = fs.readFileSync(examplePdfPath);
 
           if (res.body.slice(150).compare(fixture.slice(150)) === 0) return; // Slice out ModDate
 
+          fs.writeFileSync('./example_failed.pdf', res.body);
+          execSync('curl --upload-file ./example_failed.pdf https://transfer.sh/example_failed.pdf', { stdio: 'inherit' });
           throw new Error(`${examplePdfPath} does not match rendered pdf`);
         })
         .end(done);

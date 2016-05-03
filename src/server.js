@@ -194,6 +194,3 @@ process.on('exit', code => electronApp.exit(code));
 
 // Passthrough error handler to silence Electron GUI prompt
 process.on('uncaughtException', err => { throw err; });
-
-export default app;
-export const electron = electronApp;

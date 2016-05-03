@@ -102,6 +102,7 @@ export function createWindow() {
   const window = new BrowserWindow({
     width: WINDOW_WIDTH, height: WINDOW_HEIGHT,
     frame: DEVELOPMENT, show: DEVELOPMENT,
+    enableLargerThanScreen: true,
     webPreferences: {
       blinkFeatures: 'OverlayScrollbars', // Slimmer scrollbars
       allowDisplayingInsecureContent: true, // Show http content on https site

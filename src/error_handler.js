@@ -16,6 +16,9 @@ export class RendererError extends Error {
  */
 function handleLoadingError(currentUrl, event, code, desc, url) {
   switch (code) {
+    case -102:
+      return Promise.reject(new RendererError(
+        'CONNECTION_REFUSED', 'Connection attempt was refused.'));
     case -105:
       return Promise.reject(new RendererError(
         'NAME_NOT_RESOLVED', 'The host name could not be resolved.'));

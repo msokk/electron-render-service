@@ -5,7 +5,7 @@ services:
   - docker
 
 env:
-  - RENDERER_ACCESS_KEY=secret CONCURRENCY=1 WINDOW_WIDTH=1024 WINDOW_HEIGHT=768 ELECTRON_ENABLE_STACK_DUMPING=true ELECTRON_ENABLE_LOGGING=true
+  - REPO=msokk/electron-render-service RENDERER_ACCESS_KEY=secret CONCURRENCY=1 WINDOW_WIDTH=1024 WINDOW_HEIGHT=768 ELECTRON_ENABLE_STACK_DUMPING=true ELECTRON_ENABLE_LOGGING=true
 
 node_js:
   - "5.10"
@@ -18,10 +18,10 @@ before_script:
 
 script:
   - npm run lint
+  - docker build -t $REPO .
+  - docker run -d -e RENDERER_ACCESS_KEY=$RENDERER_ACCESS_KEY -p 127.0.0.1:3000:3000 $REPO
   - npm test
 
 after_success:
-  - export REPO=msokk/electron-render-service
-  - docker build -t $REPO .
   - if [ ! -z "$TRAVIS_TAG" ]; then docker tag $REPO:latest $REPO:$TRAVIS_TAG; fi
   - docker push $REPO
