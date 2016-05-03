@@ -2,12 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
 import supertest from 'supertest';
-import express from 'express';
 
 const fixturePath = path.join(__dirname, 'fixtures');
-const fixtureServer = express();
-fixtureServer.use(express.static(fixturePath));
-fixtureServer.listen(3001);
 
 const request = supertest('http://localhost:3000');
 
@@ -43,7 +39,7 @@ describe('integration', () => {
       this.slow(10000);
 
       request.get('/png')
-        .query({ accessKey: process.env.RENDERER_ACCESS_KEY, url: 'http://localhost:3001/example.html' })
+        .query({ accessKey: process.env.RENDERER_ACCESS_KEY, url: 'https://example.com/' })
         .expect(res => {
           if (res.statusCode !== 200) {
             throw new Error(`Invalid response code: ${res.statusCode}\n${res.body}`);
@@ -91,7 +87,7 @@ describe('integration', () => {
 
       request.get('/pdf')
         .parse(parseBuffer) // Superagent does not detect PDF
-        .query({ accessKey: process.env.RENDERER_ACCESS_KEY, url: 'http://localhost:3001/example.html' })
+        .query({ accessKey: process.env.RENDERER_ACCESS_KEY, url: 'https://example.com/' })
         .expect(res => {
           if (res.statusCode !== 200) {
             throw new Error(`Invalid response code: ${res.statusCode}\n${res.body}`);
