@@ -18,7 +18,7 @@ if (Object.keys(validKeys).length === 0) {
 /**
  * Simple token auth middleware
  */
-export default function authMiddleware(req, res, next) {
+module.exports = function authMiddleware(req, res, next) {
   const sentKey = req.query.accessKey;
   const key = Object.keys(validKeys).filter(k => validKeys[k] === sentKey);
   if (!sentKey || key.length === 0) {
@@ -30,4 +30,4 @@ export default function authMiddleware(req, res, next) {
   /* eslint-disable no-param-reassign */
   req.keyLabel = key[0];
   return next();
-}
+};

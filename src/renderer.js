@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
-import pjson from '../package.json';
-import { BrowserWindow } from 'electron'; // eslint-disable-line import/no-unresolved
-import retry from 'retry';
+const pjson = require('../package.json');
+const { BrowserWindow } = require('electron'); // eslint-disable-line import/no-unresolved
+const retry = require('retry');
 
-import { validateResult } from './error_handler';
+const { validateResult } = require('./error_handler');
 
 const TIMEOUT = parseInt(process.env.TIMEOUT, 10) || 30;
 const DEVELOPMENT = process.env.NODE_ENV === 'development';
@@ -44,7 +44,7 @@ function renderImage({ type, quality, browserWidth, browserHeight, clippingRect 
 /**
  * Render job with error handling
  */
-export function renderWorker(window, task, done) {
+exports.renderWorker = function renderWorker(window, task, done) {
   const { webContents } = window;
   let waitOperation = null;
 
@@ -93,12 +93,12 @@ export function renderWorker(window, task, done) {
   });
 
   webContents.loadURL(task.url, { extraHeaders: DEFAULT_HEADERS });
-}
+};
 
 /**
  * Create BrowserWindow
  */
-export function createWindow() {
+exports.createWindow = function createWindow() {
   const window = new BrowserWindow({
     width: WINDOW_WIDTH, height: WINDOW_HEIGHT,
     frame: DEVELOPMENT, show: DEVELOPMENT,
@@ -120,4 +120,4 @@ export function createWindow() {
   });
 
   return window;
-}
+};

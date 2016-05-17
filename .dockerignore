@@ -1,12 +1,9 @@
 .git
 .gitignore
 .envrc
-.babelrc
 .eslintrc
-dev.js
 npm-debug.log
 
 bin/
 test/
-src/
 node_modules/

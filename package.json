@@ -1,15 +1,14 @@
 {
   "name": "electron-render-service",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Microservice for rendering PDF/PNG/JPEG from HTML with Electron",
   "bin": {
     "electron-render-service": "./bin/electron-render-service.js"
   },
   "scripts": {
-    "start": "electron dev.js",
-    "build": "babel src -d lib",
+    "start": "electron src/server.js",
     "lint": "eslint src",
-    "test": "mocha --compilers js:babel-register"
+    "test": "electron node_modules/.bin/_mocha"
   },
   "keywords": [
     "electron",
@@ -29,7 +28,7 @@
   },
   "dependencies": {
     "async": "^1.5.2",
-    "electron-prebuilt": "^0.37.8",
+    "electron-prebuilt": "^1.1.0",
     "express": "^4.13.4",
     "express-validator": "^2.20.3",
     "morgan": "^1.7.0",
@@ -37,13 +36,9 @@
     "retry": "^0.9.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.8.0",
-    "babel-eslint": "^6.0.4",
-    "babel-preset-es2015-node5": "^1.2.0",
-    "babel-register": "^6.8.0",
-    "eslint": "^2.9.0",
-    "eslint-config-airbnb-base": "^2.0.0",
-    "eslint-plugin-import": "^1.6.1",
+    "eslint": "^2.10.2",
+    "eslint-config-airbnb-base": "^3.0.1",
+    "eslint-plugin-import": "^1.8.0",
     "mocha": "^2.4.5",
     "supertest": "^1.2.0"
   }

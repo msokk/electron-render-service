@@ -1,10 +1,10 @@
-import async from 'async';
-import { renderWorker, createWindow } from './renderer';
+const async = require('async');
+const { renderWorker, createWindow } = require('./renderer');
 
 /**
  * Queues renderjobs in a pool of BrowserWindow's
  */
-export default class WindowPool {
+module.exports = class WindowPool {
   /**
    * Create Electron window pool
    */

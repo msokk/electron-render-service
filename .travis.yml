@@ -8,7 +8,7 @@ env:
   - REPO=msokk/electron-render-service RENDERER_ACCESS_KEY=secret CONCURRENCY=1 WINDOW_WIDTH=1024 WINDOW_HEIGHT=768 ELECTRON_ENABLE_STACK_DUMPING=true ELECTRON_ENABLE_LOGGING=true
 
 node_js:
-  - "5.10"
+  - "6.1.0"
 
 before_script:
   - "mkdir -p ~/.docker && echo $DOCKER_AUTH > ~/.docker/config.json"

@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import { execSync } from 'child_process';
-import supertest from 'supertest';
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+const supertest = require('supertest');
 
 const fixturePath = path.join(__dirname, 'fixtures');
 

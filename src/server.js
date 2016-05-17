@@ -1,15 +1,15 @@
-import express from 'express';
-import morgan from 'morgan';
-import responseTime from 'response-time';
-import expressValidator from 'express-validator';
+const express = require('express');
+const morgan = require('morgan');
+const responseTime = require('response-time');
+const expressValidator = require('express-validator');
 
-import { app as electronApp } from 'electron'; // eslint-disable-line import/no-unresolved
+const electronApp = require('electron').app; // eslint-disable-line import/no-unresolved
 electronApp.commandLine.appendSwitch('disable-http-cache');
 electronApp.commandLine.appendSwitch('disable-gpu');
 
-import WindowPool from './window_pool';
-import auth from './auth';
-import { printUsage, printBootMessage, handleErrors, setContentDisposition } from './util';
+const WindowPool = require('./window_pool');
+const auth = require('./auth');
+const { printUsage, printBootMessage, handleErrors, setContentDisposition } = require('./util');
 
 const HOSTNAME = process.env.HOSTNAME || '0.0.0.0';
 const PORT = process.env.PORT || 3000;

@@ -1,7 +1,7 @@
 /**
  * Custom Renderer error
  */
-export class RendererError extends Error {
+class RendererError extends Error {
   constructor(code, message, statusCode = 500) {
     super();
     this.code = code;
@@ -9,6 +9,7 @@ export class RendererError extends Error {
     this.statusCode = statusCode;
   }
 }
+exports.RendererError = RendererError;
 
 
 /**
@@ -50,7 +51,7 @@ function handleLoadingError(currentUrl, event, code, desc, url) {
 /**
  * Validate renderer result
  */
-export function validateResult(originalUrl, eventType, ...args) {
+exports.validateResult = function validateResult(originalUrl, eventType, ...args) {
   switch (eventType) {
     // Loading failures
     case 'did-fail-load': return handleLoadingError(originalUrl, ...args);
@@ -66,4 +67,4 @@ export function validateResult(originalUrl, eventType, ...args) {
     // Unhandled event
     default: return Promise.reject(new RendererError('UNHANDLED_EVENT', eventType));
   }
-}
+};

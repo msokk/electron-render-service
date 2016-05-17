@@ -1,5 +1,5 @@
-import assert from 'assert';
-import { printUsage } from '../src/util';
+const assert = require('assert');
+const { printUsage } = require('../src/util');
 
 
 describe('util', () => {
