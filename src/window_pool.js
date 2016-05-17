@@ -84,4 +84,4 @@ module.exports = class WindowPool {
       done(...args);
     });
   }
-}
+};
