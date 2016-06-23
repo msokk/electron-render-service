@@ -2,6 +2,8 @@
 const pjson = require('../package.json');
 const { BrowserWindow } = require('electron'); // eslint-disable-line import/no-unresolved
 const retry = require('retry');
+const path = require('path');
+const fs = require('fs');
 
 const { validateResult } = require('./error_handler');
 
@@ -55,7 +57,18 @@ exports.renderWorker = function renderWorker(window, task, done) {
       minTimeout: 750, maxTimeout: 1000 });
   }
 
+  if (task.html) {
+    var now = new Date();
+    var tmpFile = path.join('/tmp/', [now.getYear(), now.getMonth(), now.getDate(), process.pid, 
+        (Math.random() * 0x100000000 + 1).toString(36)].join('-') + '.html');
+    fs.writeFileSync(tmpFile, task.html);
+    task.url = 'file://' + tmpFile;
+  }
+
   webContents.once('finished', (type, ...args) => {
+    if (tmpFile) {
+      fs.unlink(tmpFile, () => {});
+    }
     clearTimeout(timeoutTimer);
 
     function renderIt() {
@@ -92,6 +105,7 @@ exports.renderWorker = function renderWorker(window, task, done) {
     }
   });
 
+  console.log(task.url);
   webContents.loadURL(task.url, { extraHeaders: DEFAULT_HEADERS });
 };
 

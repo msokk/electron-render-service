@@ -38,11 +38,14 @@ app.enable('trust proxy');
 app.get('/pdf', auth, (req, res) => {
   req.check({
     url: { // Full URL to fetch
-      notEmpty: true,
+      optional: true,
       isURL: {
         errorMessage: 'Invalid url',
         options: [{ require_protocol: true }],
       },
+    },
+    html: {
+      optional: true
     },
     pageSize: { // Specify page size of the generated PDF
       optional: true,
@@ -80,10 +83,20 @@ app.get('/pdf', auth, (req, res) => {
   req.sanitize('removePrintMedia').toBoolean(true);
   req.sanitize('delay').toInt(10);
 
-  const { url, pageSize = 'A4', marginsType = 0, printBackground = true, landscape = false,
+  const { url, html, pageSize = 'A4', marginsType = 0, printBackground = true, landscape = false,
     removePrintMedia = false, delay = 0, waitForText = false } = req.query;
 
-  req.app.pool.enqueue({ type: 'pdf', url, pageSize, marginsType,
+  if (!url && !html) {
+    res.status(400).send({
+      "input_errors":[
+        {"param":"url","msg":"Can not be empty when no html is provided", "value": url},
+        {"param":"html","msg":"Can not be empty when no url is provided", "value": html}
+      ]
+    });
+    return;
+  }
+
+  req.app.pool.enqueue({ type: 'pdf', url, html, pageSize, marginsType,
     landscape, printBackground, removePrintMedia, delay, waitForText,
   }, (err, buffer) => {
     if (handleErrors(err, req, res)) return;
@@ -101,11 +114,14 @@ app.get(/^\/(png|jpeg)/, auth, (req, res) => {
   const type = req.params[0];
   req.check({
     url: { // Full URL to fetch
-      notEmpty: true,
+      optional: true,
       isURL: {
         errorMessage: 'Invalid url',
         options: [{ require_protocol: true }],
-      },
+      }
+    },
+    html: {
+      optional: true
     },
     quality: { // JPEG quality
       optional: true, isInt: true,
@@ -150,11 +166,21 @@ app.get(/^\/(png|jpeg)/, auth, (req, res) => {
     req.sanitize('clippingRect.height').toInt(10);
   }
 
-  const { url, quality = 80, delay, waitForText, clippingRect,
+  const { url, html, quality = 80, delay, waitForText, clippingRect,
     browserWidth = WINDOW_WIDTH, browserHeight = WINDOW_HEIGHT } = req.query;
 
+  if (!url && !html) {
+    res.status(400).send({
+      "input_errors":[
+        {"param":"url","msg":"Can not be empty when no html is provided", "value": url},
+        {"param":"html","msg":"Can not be empty when no url is provided", "value": html}
+      ]
+    });
+    return;
+  }
+
   req.app.pool.enqueue({
-    type, url, quality, delay, waitForText, clippingRect,
+    type, url, html, quality, delay, waitForText, clippingRect,
     browserWidth: Math.min(browserWidth, LIMIT), // Cap width and height to avoid overload
     browserHeight: Math.min(browserHeight, LIMIT),
   }, (err, buffer) => {
