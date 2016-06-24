@@ -22,6 +22,15 @@ function renderPDF(options, done) {
     this.webContents.executeJavaScript(code);
   }
 
+  // Support setting page size in microns with NxN syntax
+  const customPage = options.pageSize.match(/([0-9]+)x([0-9]+)/);
+  if (customPage) {
+    options.pageSize = { // eslint-disable-line no-param-reassign
+      width: parseInt(customPage[1], 10),
+      height: parseInt(customPage[2], 10),
+    };
+  }
+
   this.webContents.printToPDF(options, done);
 }
 

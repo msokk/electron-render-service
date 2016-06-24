@@ -69,7 +69,9 @@ app.get('/pdf', auth, (req, res) => {
   req.check({
     pageSize: { // Specify page size of the generated PDF
       optional: true,
-      isIn: { options: [['A3', 'A4', 'A5', 'Legal', 'Letter', 'Tabloid']] },
+      matches: {
+        options: [/A3|A4|A5|Legal|Letter|Tabloid|[0-9]+x[0-9]+/],
+      },
     },
     marginsType: { // Specify the type of margins to use
       optional: true, isInt: true, isIn: { options: [[0, 1, 2]] },

@@ -49,7 +49,7 @@ wget -o out.pdf http://localhost:3000/pdf?url=https://github.com/msokk/electron-
 
   * `accessKey` - Authentication key.
   * `url` - Full URL to fetch.
-  * `pageSize` - Specify page size of the generated PDF. (default: `A4`)
+  * `pageSize` - Specify page size of the generated PDF. Can be `A3`, `A4`, `A5`, `Legal`, `Letter`, `Tabloid` or `<width>x<height>` in microns (e.g. `210000x297000` for A4)(default: `A4`)
   * `marginsType` - Specify the type of margins to use (default: `0`)
   * `printBackground` - Whether to print CSS backgrounds. (default: `true`)
   * `landscape` -  `true` for landscape, `false` for portrait. (default: `false`)
