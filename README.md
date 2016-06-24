@@ -29,7 +29,7 @@ Based on official [Debian Jessie](https://hub.docker.com/_/debian/) image, uses 
 sed -i 's/main/main contrib/g' /etc/apt/sources.list
 
 # Install packages needed for runtime
-apt-get update && apt-get install -y xvfb libgtk2.0-0 ttf-mscorefonts-installer libnotify4 libgconf2-4 libnss3 dbus-x11
+apt-get update && apt-get install -y xvfb libgtk2.0-0 ttf-mscorefonts-installer libnotify4 libgconf2-4 libxss1 libnss3 dbus-x11
 
 # Install from NPM
 npm install -g electron-render-service

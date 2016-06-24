@@ -16,7 +16,7 @@ COPY .fonts.conf /root/.fonts.conf
 RUN sed -i 's/main/main contrib/g' /etc/apt/sources.list && \
     curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
     apt-get upgrade -y && \
-    apt-get install -y unzip xvfb libgtk2.0-0 ttf-mscorefonts-installer libnotify4 libgconf2-4 libnss3 dbus-x11 && \
+    apt-get install -y unzip xvfb libgtk2.0-0 ttf-mscorefonts-installer libnotify4 libgconf2-4 libxss1 libnss3 dbus-x11 && \
 
     # Get Electron
     wget "https://github.com/atom/electron/releases/download/v${ELECTRON_VERSION}/electron-v${ELECTRON_VERSION}-linux-x64.zip" -O electron.zip && \
