@@ -102,10 +102,6 @@ Identical as above, omit `url` and provide HTML in request body.
 * `HOSTNAME` - Hostname to accept Express connections on (default: `0.0.0.0`)
 * `PORT` - (default: `3000`)
 
-## Rendering issues in latest Electron (Chrome 50)
-* [box-shadow is black in PDF](https://code.google.com/p/chromium/issues/detail?id=174583) - To keep the box shadow, add `-webkit-filter: blur(0);` rule next to it. Note that this rasterizes the whole layer, making large areas noticeably blurry. Or just hide the box shadow.
-* `border-radius` creates double width borders without rounded corners
-
 
 ## Delayed Rendering
 
