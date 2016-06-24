@@ -2,6 +2,8 @@ const express = require('express');
 const morgan = require('morgan');
 const responseTime = require('response-time');
 const expressValidator = require('express-validator');
+const path = require('path');
+const fs = require('fs');
 
 const electronApp = require('electron').app; // eslint-disable-line import/no-unresolved
 electronApp.commandLine.appendSwitch('disable-http-cache');
@@ -29,6 +31,32 @@ app.use(morgan(`[:date[iso]] :key-label@:remote-addr - :method :status
 app.disable('x-powered-by');
 app.enable('trust proxy');
 
+app.post(/^\/(pdf|png|jpeg)/, auth, (req, res, next) => {
+  const tmpFile = path.join('/tmp/', `${(new Date()).toUTCString()}-${process.pid}-${
+      (Math.random() * 0x100000000 + 1).toString(36)}.html`);
+  const writeStream = fs.createWriteStream(tmpFile);
+  req.pipe(writeStream);
+  writeStream.on('finish', () => {
+    if (!fs.statSync(tmpFile).size) {
+      res.status(400).send({
+        input_errors: [
+          {
+            param: 'body',
+            msg: 'Please post raw HTML',
+          },
+        ],
+      });
+      return;
+    }
+
+    // continue as a regular GET request
+    /* eslint-disable no-param-reassign */
+    req.method = 'GET';
+    res.locals.tmpFile = tmpFile;
+    /* eslint-enable no-param-reassign */
+    next();
+  });
+});
 
 /**
  * GET /pdf - Render PDF
@@ -37,13 +65,6 @@ app.enable('trust proxy');
  */
 app.get('/pdf', auth, (req, res) => {
   req.check({
-    url: { // Full URL to fetch
-      notEmpty: true,
-      isURL: {
-        errorMessage: 'Invalid url',
-        options: [{ require_protocol: true }],
-      },
-    },
     pageSize: { // Specify page size of the generated PDF
       optional: true,
       isIn: { options: [['A3', 'A4', 'A5', 'Legal', 'Letter', 'Tabloid']] },
@@ -74,18 +95,30 @@ app.get('/pdf', auth, (req, res) => {
     return;
   }
 
+  if (!res.locals.tmpFile && !(req.query.url && req.query.url.match(/^https?:\/\/.+$/i))) {
+    res.status(400).send({ input_errors: [{
+      param: 'url',
+      msg: 'Please provide url or send HTML via POST',
+    }] });
+    return;
+  }
+
   req.sanitize('marginsType').toInt(10);
   req.sanitize('printBackground').toBoolean(true);
   req.sanitize('landscape').toBoolean(true);
   req.sanitize('removePrintMedia').toBoolean(true);
   req.sanitize('delay').toInt(10);
 
-  const { url, pageSize = 'A4', marginsType = 0, printBackground = true, landscape = false,
+  const { pageSize = 'A4', marginsType = 0, printBackground = true, landscape = false,
     removePrintMedia = false, delay = 0, waitForText = false } = req.query;
+  const url = (res.locals.tmpFile ? `file://${res.locals.tmpFile}` : req.query.url);
 
   req.app.pool.enqueue({ type: 'pdf', url, pageSize, marginsType,
     landscape, printBackground, removePrintMedia, delay, waitForText,
   }, (err, buffer) => {
+    if (res.locals.tmpFile) {
+      fs.unlink(res.locals.tmpFile, () => {});
+    }
     if (handleErrors(err, req, res)) return;
 
     setContentDisposition(res, 'pdf');
@@ -100,13 +133,6 @@ app.get('/pdf', auth, (req, res) => {
 app.get(/^\/(png|jpeg)/, auth, (req, res) => {
   const type = req.params[0];
   req.check({
-    url: { // Full URL to fetch
-      notEmpty: true,
-      isURL: {
-        errorMessage: 'Invalid url',
-        options: [{ require_protocol: true }],
-      },
-    },
     quality: { // JPEG quality
       optional: true, isInt: true,
     },
@@ -123,6 +149,15 @@ app.get(/^\/(png|jpeg)/, auth, (req, res) => {
       optional: true, notEmpty: true,
     },
   });
+
+  if (!res.locals.tmpFile && !(req.query.url && req.query.url.match(/^https?:\/\/.+$/i))) {
+    res.status(400).send({ input_errors: [{
+      param: 'url',
+      msg: 'Please provide url or send HTML via POST',
+    }],
+    });
+    return;
+  }
 
   if (req.query.clippingRect) {
     req.check({
@@ -150,14 +185,18 @@ app.get(/^\/(png|jpeg)/, auth, (req, res) => {
     req.sanitize('clippingRect.height').toInt(10);
   }
 
-  const { url, quality = 80, delay, waitForText, clippingRect,
+  const { quality = 80, delay, waitForText, clippingRect,
     browserWidth = WINDOW_WIDTH, browserHeight = WINDOW_HEIGHT } = req.query;
+  const url = (res.locals.tmpFile ? `file://${res.locals.tmpFile}` : req.query.url);
 
   req.app.pool.enqueue({
     type, url, quality, delay, waitForText, clippingRect,
     browserWidth: Math.min(browserWidth, LIMIT), // Cap width and height to avoid overload
     browserHeight: Math.min(browserHeight, LIMIT),
   }, (err, buffer) => {
+    if (res.locals.tmpFile) {
+      fs.unlink(res.locals.tmpFile, () => {});
+    }
     if (handleErrors(err, req, res)) return;
 
     setContentDisposition(res, type);

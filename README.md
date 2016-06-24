@@ -6,6 +6,7 @@
 
 Simple PDF/PNG/JPEG render service, accepts webpage URL and returns the resource.
 
+Alternatively an HTML payload can be POST-ed.
 
 ## Docker usage
 
@@ -56,6 +57,10 @@ wget -o out.pdf http://localhost:3000/pdf?url=https://github.com/msokk/electron-
   * `delay` - Specify how long to wait before generating the PDF (default: `0`)
   * `waitForText` - Specify a specific string of text to find before generating the PDF (default: `false`)
 
+### `POST /pdf`
+
+Identical as above, omit `url` and provide HTML in request body.
+
 #### `GET /png|jpeg` - Render PNG/JPEG
 
 *Query params:*
@@ -72,6 +77,10 @@ wget -o out.pdf http://localhost:3000/pdf?url=https://github.com/msokk/electron-
     * `clippingRect[y]`
     * `clippingRect[width]`
     * `clippingRect[height]`
+
+### `POST /png|jpeg`
+
+Identical as above, omit `url` and provide HTML in request body.
 
 #### `GET /stats` - Display render pool stats
 
