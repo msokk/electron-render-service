@@ -2,6 +2,8 @@ const express = require('express');
 const morgan = require('morgan');
 const responseTime = require('response-time');
 const expressValidator = require('express-validator');
+const path = require('path');
+const fs = require('fs');
 
 const electronApp = require('electron').app; // eslint-disable-line import/no-unresolved
 electronApp.commandLine.appendSwitch('disable-http-cache');
@@ -29,6 +31,87 @@ app.use(morgan(`[:date[iso]] :key-label@:remote-addr - :method :status
 app.disable('x-powered-by');
 app.enable('trust proxy');
 
+function getCheckConfig(req, res) {
+  var checkConfig = {
+    url: (res.locals.tmpFile
+        ? {}
+        : { // Full URL to fetch
+            isURL: {
+              errorMessage: 'Invalid url',
+              options: [{
+                require_protocol: true
+              }]
+            }
+          }
+    ),
+    delay: { // Specify how long to wait before generating the PDF
+      optional: true, isInt: true,
+    },
+    waitForText: { // Specify a specific string of text to find before generating the PDF
+      optional: true, notEmpty: true,
+    }
+  };
+
+  if (req.path.match(/^\/(pdf|png|jpeg)/)) {
+    Object.assign(checkConfig, {
+      quality: { // JPEG quality
+        optional: true,
+        isInt: true,
+      },
+      browserWidth: { // Browser window width
+        optional: true,
+        isInt: true
+      },
+      browserHeight: { // Browser window height
+       optional: true,
+        isInt: true,
+     }
+    });
+  } else {
+    Object.assign(checkConfig, {
+      pageSize: { // Specify page size of the generated PDF
+        optional: true,
+        isIn: {options: [['A3', 'A4', 'A5', 'Legal', 'Letter', 'Tabloid']]},
+      },
+      marginsType: { // Specify the type of margins to use
+        optional: true, isInt: true, isIn: {options: [[0, 1, 2]]},
+      },
+      printBackground: { // Whether to print CSS backgrounds.
+        optional: true, isBoolean: true,
+      },
+      landscape: { // true for landscape, false for portrait.
+        optional: true, isBoolean: true,
+      },
+      removePrintMedia: { // Removes any <link media="print"> stylesheets on page before render.
+        optional: true, isBoolean: true,
+      }
+    });
+  };
+}
+
+app.post(/^\/(pdf|png|jpeg)/, auth, (req, res, next) => {
+  var now = new Date();
+  var tmpFile = path.join('/tmp/', [now.getYear(), now.getMonth(), now.getDate(), process.pid,
+      (Math.random() * 0x100000000 + 1).toString(36)].join('-') + '.html');
+  var writeStream = fs.createWriteStream(tmpFile);
+  req.pipe(writeStream);
+  writeStream.on('finish', () => {
+    if (!fs.statSync(tmpFile).size) {
+      res.status(400).send({
+        input_errors: [
+          {"param":"body","msg":"Please post raw HTML"}
+        ]
+      });
+      return;
+    }
+
+    //continue as a regular GET request
+    req.method = 'GET';
+    req.query.url = 'file://' + tmpFile;
+    res.locals.tmpFile = tmpFile;
+    next();
+  });
+});
 
 /**
  * GET /pdf - Render PDF
@@ -36,40 +119,7 @@ app.enable('trust proxy');
  * See more at https://git.io/vwDaJ
  */
 app.get('/pdf', auth, (req, res) => {
-  req.check({
-    url: { // Full URL to fetch
-      optional: true,
-      isURL: {
-        errorMessage: 'Invalid url',
-        options: [{ require_protocol: true }],
-      },
-    },
-    html: {
-      optional: true
-    },
-    pageSize: { // Specify page size of the generated PDF
-      optional: true,
-      isIn: { options: [['A3', 'A4', 'A5', 'Legal', 'Letter', 'Tabloid']] },
-    },
-    marginsType: { // Specify the type of margins to use
-      optional: true, isInt: true, isIn: { options: [[0, 1, 2]] },
-    },
-    printBackground: { // Whether to print CSS backgrounds.
-      optional: true, isBoolean: true,
-    },
-    landscape: { // true for landscape, false for portrait.
-      optional: true, isBoolean: true,
-    },
-    removePrintMedia: { // Removes any <link media="print"> stylesheets on page before render.
-      optional: true, isBoolean: true,
-    },
-    delay: { // Specify how long to wait before generating the PDF
-      optional: true, isInt: true,
-    },
-    waitForText: { // Specify a specific string of text to find before generating the PDF
-      optional: true, notEmpty: true,
-    },
-  });
+  req.check(getCheckConfig(req, res));
 
   const validationResult = req.validationErrors();
   if (validationResult) {
@@ -83,22 +133,15 @@ app.get('/pdf', auth, (req, res) => {
   req.sanitize('removePrintMedia').toBoolean(true);
   req.sanitize('delay').toInt(10);
 
-  const { url, html, pageSize = 'A4', marginsType = 0, printBackground = true, landscape = false,
+  const { url, pageSize = 'A4', marginsType = 0, printBackground = true, landscape = false,
     removePrintMedia = false, delay = 0, waitForText = false } = req.query;
 
-  if (!url && !html) {
-    res.status(400).send({
-      "input_errors":[
-        {"param":"url","msg":"Can not be empty when no html is provided", "value": url},
-        {"param":"html","msg":"Can not be empty when no url is provided", "value": html}
-      ]
-    });
-    return;
-  }
-
-  req.app.pool.enqueue({ type: 'pdf', url, html, pageSize, marginsType,
+  req.app.pool.enqueue({ type: 'pdf', url, pageSize, marginsType,
     landscape, printBackground, removePrintMedia, delay, waitForText,
   }, (err, buffer) => {
+    if (res.locals.tmpFile) {
+      fs.unlink(res.locals.tmpFile, () => {});
+    }
     if (handleErrors(err, req, res)) return;
 
     setContentDisposition(res, 'pdf');
@@ -112,33 +155,12 @@ app.get('/pdf', auth, (req, res) => {
  */
 app.get(/^\/(png|jpeg)/, auth, (req, res) => {
   const type = req.params[0];
-  req.check({
-    url: { // Full URL to fetch
-      optional: true,
-      isURL: {
-        errorMessage: 'Invalid url',
-        options: [{ require_protocol: true }],
-      }
-    },
-    html: {
-      optional: true
-    },
-    quality: { // JPEG quality
-      optional: true, isInt: true,
-    },
-    browserWidth: { // Browser window width
-      optional: true, isInt: true,
-    },
-    browserHeight: { // Browser window height
-      optional: true, isInt: true,
-    },
-    delay: { // Specify how long to wait before generating the PDF
-      optional: true, isInt: true,
-    },
-    waitForText: { // Specify a specific string of text to find before generating the PDF
-      optional: true, notEmpty: true,
-    },
-  });
+  req.check(getCheckConfig(req, res));
+
+  if (!req.query.url) {
+    res.status(400).send({ input_errors: 'huh' });
+    return;
+  }
 
   if (req.query.clippingRect) {
     req.check({
@@ -166,24 +188,17 @@ app.get(/^\/(png|jpeg)/, auth, (req, res) => {
     req.sanitize('clippingRect.height').toInt(10);
   }
 
-  const { url, html, quality = 80, delay, waitForText, clippingRect,
+  const { url, quality = 80, delay, waitForText, clippingRect,
     browserWidth = WINDOW_WIDTH, browserHeight = WINDOW_HEIGHT } = req.query;
 
-  if (!url && !html) {
-    res.status(400).send({
-      "input_errors":[
-        {"param":"url","msg":"Can not be empty when no html is provided", "value": url},
-        {"param":"html","msg":"Can not be empty when no url is provided", "value": html}
-      ]
-    });
-    return;
-  }
-
   req.app.pool.enqueue({
-    type, url, html, quality, delay, waitForText, clippingRect,
+    type, url, quality, delay, waitForText, clippingRect,
     browserWidth: Math.min(browserWidth, LIMIT), // Cap width and height to avoid overload
     browserHeight: Math.min(browserHeight, LIMIT),
   }, (err, buffer) => {
+    if (res.locals.tmpFile) {
+      fs.unlink(res.locals.tmpFile, () => {});
+    }
     if (handleErrors(err, req, res)) return;
 
     setContentDisposition(res, type);
