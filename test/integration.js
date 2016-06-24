@@ -42,7 +42,7 @@ describe('integration', () => {
         .query({ accessKey: process.env.RENDERER_ACCESS_KEY, url: 'https://example.com/' })
         .expect(res => {
           if (res.statusCode !== 200) {
-            throw new Error(`Invalid response code: ${res.statusCode}\n${res.body}`);
+            throw new Error(`Invalid response code: ${res.statusCode}\n${JSON.stringify(res.body)}`);
           }
 
           const examplePngPath = path.join(fixturePath, 'example.png');

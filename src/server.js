@@ -31,66 +31,6 @@ app.use(morgan(`[:date[iso]] :key-label@:remote-addr - :method :status
 app.disable('x-powered-by');
 app.enable('trust proxy');
 
-function getCheckConfig(req, res) {
-  const checkConfig = {
-    delay: { // Specify how long to wait before generating the PDF
-      optional: true, isInt: true,
-    },
-    waitForText: { // Specify a specific string of text to find before generating the PDF
-      optional: true, notEmpty: true,
-    },
-  };
-
-  if (!res.locals.tmpFile) {
-    checkConfig.url = {
-      isURL: {
-        errorMessage: 'Invalid url',
-        options: [{
-          require_protocol: true,
-        }],
-      },
-    };
-  }
-
-  if (req.path.match(/^\/(pdf|png|jpeg)/)) {
-    Object.assign(checkConfig, {
-      quality: { // JPEG quality
-        optional: true,
-        isInt: true,
-      },
-      browserWidth: { // Browser window width
-        optional: true,
-        isInt: true,
-      },
-      browserHeight: { // Browser window height
-        optional: true,
-        isInt: true,
-      },
-    });
-  } else {
-    Object.assign(checkConfig, {
-      pageSize: { // Specify page size of the generated PDF
-        optional: true,
-        isIn: { options: [['A3', 'A4', 'A5', 'Legal', 'Letter', 'Tabloid']] },
-      },
-      marginsType: { // Specify the type of margins to use
-        optional: true, isInt: true, isIn: { options: [[0, 1, 2]] },
-      },
-      printBackground: { // Whether to print CSS backgrounds.
-        optional: true, isBoolean: true,
-      },
-      landscape: { // true for landscape, false for portrait.
-        optional: true, isBoolean: true,
-      },
-      removePrintMedia: { // Removes any <link media="print"> stylesheets on page before render.
-        optional: true, isBoolean: true,
-      },
-    });
-  }
-
-  return checkConfig;
-}
-
 app.post(/^\/(pdf|png|jpeg)/, auth, (req, res, next) => {
   const tmpFile = path.join('/tmp/', `${(new Date()).toUTCString()}-${process.pid}-${
       (Math.random() * 0x100000000 + 1).toString(36)}.html`);
@@ -124,11 +64,41 @@ app.post(/^\/(pdf|png|jpeg)/, auth, (req, res, next) => {
  * See more at https://git.io/vwDaJ
  */
 app.get('/pdf', auth, (req, res) => {
-  req.check(getCheckConfig(req, res));
+  req.check({
+    pageSize: { // Specify page size of the generated PDF
+      optional: true,
+      isIn: { options: [['A3', 'A4', 'A5', 'Legal', 'Letter', 'Tabloid']] },
+    },
+    marginsType: { // Specify the type of margins to use
+      optional: true, isInt: true, isIn: { options: [[0, 1, 2]] },
+    },
+    printBackground: { // Whether to print CSS backgrounds.
+      optional: true, isBoolean: true,
+    },
+    landscape: { // true for landscape, false for portrait.
+      optional: true, isBoolean: true,
+    },
+    removePrintMedia: { // Removes any <link media="print"> stylesheets on page before render.
+      optional: true, isBoolean: true,
+    },
+    delay: { // Specify how long to wait before generating the PDF
+      optional: true, isInt: true,
+    },
+    waitForText: { // Specify a specific string of text to find before generating the PDF
+      optional: true, notEmpty: true,
+    },
+  });
 
   const validationResult = req.validationErrors();
   if (validationResult) {
     res.status(400).send({ input_errors: validationResult });
+    return;
+  }
+
+  if (!res.locals.tmpFile && !(req.query.url && req.query.url.match(/^https?:\/\/.+$/i))) {
+    res.status(400).send({ input_errors: [{
+      "param":"url", "msg":"Please provide url or send HTML via POST"}
+    ] });
     return;
   }
 
@@ -160,7 +130,31 @@ app.get('/pdf', auth, (req, res) => {
  */
 app.get(/^\/(png|jpeg)/, auth, (req, res) => {
   const type = req.params[0];
-  req.check(getCheckConfig(req, res));
+  req.check({
+    quality: { // JPEG quality
+      optional: true, isInt: true,
+    },
+    browserWidth: { // Browser window width
+      optional: true, isInt: true,
+    },
+    browserHeight: { // Browser window height
+      optional: true, isInt: true,
+    },
+    delay: { // Specify how long to wait before generating the PDF
+      optional: true, isInt: true,
+    },
+    waitForText: { // Specify a specific string of text to find before generating the PDF
+      optional: true, notEmpty: true,
+    },
+  });
+
+  if (!res.locals.tmpFile && !(req.query.url && req.query.url.match(/^https?:\/\/.+$/i))) {
+    res.status(400).send({ input_errors: [{
+      "param":"url", "msg":"Please provide url or send HTML via POST"}
+    ] });
+    return;
+  }
+
   if (req.query.clippingRect) {
     req.check({
       'clippingRect.x': { isInt: { errorMessage: 'Invalid value' } },
