@@ -97,8 +97,9 @@ app.get('/pdf', auth, (req, res) => {
 
   if (!res.locals.tmpFile && !(req.query.url && req.query.url.match(/^https?:\/\/.+$/i))) {
     res.status(400).send({ input_errors: [{
-      "param":"url", "msg":"Please provide url or send HTML via POST"}
-    ] });
+      param: 'url',
+      msg: 'Please provide url or send HTML via POST',
+    }] });
     return;
   }
 
@@ -150,8 +151,10 @@ app.get(/^\/(png|jpeg)/, auth, (req, res) => {
 
   if (!res.locals.tmpFile && !(req.query.url && req.query.url.match(/^https?:\/\/.+$/i))) {
     res.status(400).send({ input_errors: [{
-      "param":"url", "msg":"Please provide url or send HTML via POST"}
-    ] });
+      param: 'url',
+      msg: 'Please provide url or send HTML via POST',
+    }],
+    });
     return;
   }
 
