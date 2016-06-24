@@ -33,17 +33,6 @@ app.enable('trust proxy');
 
 function getCheckConfig(req, res) {
   const checkConfig = {
-    url: (res.locals.tmpFile
-        ? {}
-        : {
-          isURL: {
-            errorMessage: 'Invalid url',
-            options: [{
-              require_protocol: true,
-            }],
-          },
-        }
-    ),
     delay: { // Specify how long to wait before generating the PDF
       optional: true, isInt: true,
     },
@@ -51,6 +40,17 @@ function getCheckConfig(req, res) {
       optional: true, notEmpty: true,
     },
   };
+
+  if (!res.locals.tmpFile) {
+    checkConfig.url = {
+      isURL: {
+        errorMessage: 'Invalid url',
+        options: [{
+          require_protocol: true,
+        }],
+      },
+    };
+  }
 
   if (req.path.match(/^\/(pdf|png|jpeg)/)) {
     Object.assign(checkConfig, {
@@ -87,12 +87,13 @@ function getCheckConfig(req, res) {
       },
     });
   }
+
+  return checkConfig;
 }
 
 app.post(/^\/(pdf|png|jpeg)/, auth, (req, res, next) => {
-  const now = new Date();
-  const tmpFile = path.join('/tmp/', now.getYear(), now.getMonth(), now.getDate(), process.pid,
-      (Math.random() * 0x100000000 + 1).toString(36), '.html');
+  const tmpFile = path.join('/tmp/', `${(new Date()).toUTCString()}-${process.pid}-${
+      (Math.random() * 0x100000000 + 1).toString(36)}.html`);
   const writeStream = fs.createWriteStream(tmpFile);
   req.pipe(writeStream);
   writeStream.on('finish', () => {
@@ -111,7 +112,6 @@ app.post(/^\/(pdf|png|jpeg)/, auth, (req, res, next) => {
     // continue as a regular GET request
     /* eslint-disable no-param-reassign */
     req.method = 'GET';
-    req.query.url = `file://${tmpFile}`;
     res.locals.tmpFile = tmpFile;
     /* eslint-enable no-param-reassign */
     next();
@@ -161,12 +161,6 @@ app.get('/pdf', auth, (req, res) => {
 app.get(/^\/(png|jpeg)/, auth, (req, res) => {
   const type = req.params[0];
   req.check(getCheckConfig(req, res));
-
-  if (!req.query.url) {
-    res.status(400).send({ input_errors: 'huh' });
-    return;
-  }
-
   if (req.query.clippingRect) {
     req.check({
       'clippingRect.x': { isInt: { errorMessage: 'Invalid value' } },
@@ -193,8 +187,9 @@ app.get(/^\/(png|jpeg)/, auth, (req, res) => {
     req.sanitize('clippingRect.height').toInt(10);
   }
 
-  const { url, quality = 80, delay, waitForText, clippingRect,
+  const { quality = 80, delay, waitForText, clippingRect,
     browserWidth = WINDOW_WIDTH, browserHeight = WINDOW_HEIGHT } = req.query;
+  const url = (res.locals.tmpFile ? `file://${res.locals.tmpFile}` : req.query.url);
 
   req.app.pool.enqueue({
     type, url, quality, delay, waitForText, clippingRect,
