@@ -32,24 +32,24 @@ app.disable('x-powered-by');
 app.enable('trust proxy');
 
 function getCheckConfig(req, res) {
-  var checkConfig = {
+  const checkConfig = {
     url: (res.locals.tmpFile
         ? {}
-        : { // Full URL to fetch
-            isURL: {
-              errorMessage: 'Invalid url',
-              options: [{
-                require_protocol: true
-              }]
-            }
-          }
+        : {
+          isURL: {
+            errorMessage: 'Invalid url',
+            options: [{
+              require_protocol: true,
+            }],
+          },
+        }
     ),
     delay: { // Specify how long to wait before generating the PDF
       optional: true, isInt: true,
     },
     waitForText: { // Specify a specific string of text to find before generating the PDF
       optional: true, notEmpty: true,
-    }
+    },
   };
 
   if (req.path.match(/^\/(pdf|png|jpeg)/)) {
@@ -60,21 +60,21 @@ function getCheckConfig(req, res) {
       },
       browserWidth: { // Browser window width
         optional: true,
-        isInt: true
+        isInt: true,
       },
       browserHeight: { // Browser window height
-       optional: true,
+        optional: true,
         isInt: true,
-     }
+      },
     });
   } else {
     Object.assign(checkConfig, {
       pageSize: { // Specify page size of the generated PDF
         optional: true,
-        isIn: {options: [['A3', 'A4', 'A5', 'Legal', 'Letter', 'Tabloid']]},
+        isIn: { options: [['A3', 'A4', 'A5', 'Legal', 'Letter', 'Tabloid']] },
       },
       marginsType: { // Specify the type of margins to use
-        optional: true, isInt: true, isIn: {options: [[0, 1, 2]]},
+        optional: true, isInt: true, isIn: { options: [[0, 1, 2]] },
       },
       printBackground: { // Whether to print CSS backgrounds.
         optional: true, isBoolean: true,
@@ -84,31 +84,36 @@ function getCheckConfig(req, res) {
       },
       removePrintMedia: { // Removes any <link media="print"> stylesheets on page before render.
         optional: true, isBoolean: true,
-      }
+      },
     });
-  };
+  }
 }
 
 app.post(/^\/(pdf|png|jpeg)/, auth, (req, res, next) => {
-  var now = new Date();
-  var tmpFile = path.join('/tmp/', [now.getYear(), now.getMonth(), now.getDate(), process.pid,
-      (Math.random() * 0x100000000 + 1).toString(36)].join('-') + '.html');
-  var writeStream = fs.createWriteStream(tmpFile);
+  const now = new Date();
+  const tmpFile = path.join('/tmp/', now.getYear(), now.getMonth(), now.getDate(), process.pid,
+      (Math.random() * 0x100000000 + 1).toString(36), '.html');
+  const writeStream = fs.createWriteStream(tmpFile);
   req.pipe(writeStream);
   writeStream.on('finish', () => {
     if (!fs.statSync(tmpFile).size) {
       res.status(400).send({
         input_errors: [
-          {"param":"body","msg":"Please post raw HTML"}
-        ]
+          {
+            param: 'body',
+            msg: 'Please post raw HTML',
+          },
+        ],
       });
       return;
     }
 
-    //continue as a regular GET request
+    // continue as a regular GET request
+    /* eslint-disable no-param-reassign */
     req.method = 'GET';
-    req.query.url = 'file://' + tmpFile;
+    req.query.url = `file://${tmpFile}`;
     res.locals.tmpFile = tmpFile;
+    /* eslint-enable no-param-reassign */
     next();
   });
 });
