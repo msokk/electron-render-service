@@ -102,6 +102,7 @@ exports.createWindow = function createWindow() {
   const window = new BrowserWindow({
     width: WINDOW_WIDTH, height: WINDOW_HEIGHT,
     frame: DEVELOPMENT, show: DEVELOPMENT,
+    transparent: true,
     enableLargerThanScreen: true,
     webPreferences: {
       blinkFeatures: 'OverlayScrollbars', // Slimmer scrollbars
