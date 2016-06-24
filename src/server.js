@@ -109,8 +109,9 @@ app.get('/pdf', auth, (req, res) => {
   req.sanitize('removePrintMedia').toBoolean(true);
   req.sanitize('delay').toInt(10);
 
-  const { url, pageSize = 'A4', marginsType = 0, printBackground = true, landscape = false,
+  const { pageSize = 'A4', marginsType = 0, printBackground = true, landscape = false,
     removePrintMedia = false, delay = 0, waitForText = false } = req.query;
+  const url = (res.locals.tmpFile ? `file://${res.locals.tmpFile}` : req.query.url);
 
   req.app.pool.enqueue({ type: 'pdf', url, pageSize, marginsType,
     landscape, printBackground, removePrintMedia, delay, waitForText,
