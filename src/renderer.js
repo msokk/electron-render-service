@@ -60,8 +60,12 @@ exports.renderWorker = function renderWorker(window, task, done) {
   const timeoutTimer = setTimeout(() => webContents.emit('timeout'), TIMEOUT * 1000);
 
   if (task.waitForText !== false) {
-    waitOperation = retry.operation({ retries: TIMEOUT, factor: 1,
-      minTimeout: 750, maxTimeout: 1000 });
+    waitOperation = retry.operation({
+      retries: TIMEOUT,
+      factor: 1,
+      minTimeout: 750,
+      maxTimeout: 1000,
+    });
   }
 
   webContents.once('finished', (type, ...args) => {
@@ -109,8 +113,10 @@ exports.renderWorker = function renderWorker(window, task, done) {
  */
 exports.createWindow = function createWindow() {
   const window = new BrowserWindow({
-    width: WINDOW_WIDTH, height: WINDOW_HEIGHT,
-    frame: DEVELOPMENT, show: DEVELOPMENT,
+    width: WINDOW_WIDTH,
+    height: WINDOW_HEIGHT,
+    frame: DEVELOPMENT,
+    show: DEVELOPMENT,
     transparent: true,
     enableLargerThanScreen: true,
     webPreferences: {

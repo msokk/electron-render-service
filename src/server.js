@@ -34,7 +34,7 @@ app.enable('trust proxy');
 
 app.post(/^\/(pdf|png|jpeg)/, auth, (req, res, next) => {
   const tmpFile = path.join('/tmp/', `${(new Date()).toUTCString()}-${process.pid}-${
-      (Math.random() * 0x100000000 + 1).toString(36)}.html`);
+      ((Math.random() * 0x100000000) + 1).toString(36)}.html`);
 
   const writeStream = fs.createWriteStream(tmpFile);
   req.pipe(writeStream);
@@ -118,8 +118,16 @@ app.get('/pdf', auth, (req, res) => {
     removePrintMedia = false, delay = 0, waitForText = false } = req.query;
   const url = (res.locals.tmpFile ? `file://${res.locals.tmpFile}` : req.query.url);
 
-  req.app.pool.enqueue({ type: 'pdf', url, pageSize, marginsType,
-    landscape, printBackground, removePrintMedia, delay, waitForText,
+  req.app.pool.enqueue({
+    type: 'pdf',
+    url,
+    pageSize,
+    marginsType,
+    landscape,
+    printBackground,
+    removePrintMedia,
+    delay,
+    waitForText,
   }, (err, buffer) => {
     if (res.locals.tmpFile) {
       fs.unlink(res.locals.tmpFile, () => {});
@@ -195,7 +203,12 @@ app.get(/^\/(png|jpeg)/, auth, (req, res) => {
   const url = (res.locals.tmpFile ? `file://${res.locals.tmpFile}` : req.query.url);
 
   req.app.pool.enqueue({
-    type, url, quality, delay, waitForText, clippingRect,
+    type,
+    url,
+    quality,
+    delay,
+    waitForText,
+    clippingRect,
     browserWidth: Math.min(browserWidth, LIMIT), // Cap width and height to avoid overload
     browserHeight: Math.min(browserHeight, LIMIT),
   }, (err, buffer) => {

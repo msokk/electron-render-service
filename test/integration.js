@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const supertest = require('supertest');
+const supertest = require('supertest'); // eslint-disable-line
 
 const fixturePath = path.join(__dirname, 'fixtures');
 
@@ -42,7 +42,8 @@ describe('integration', () => {
         .query({ accessKey: process.env.RENDERER_ACCESS_KEY, url: 'https://example.com/' })
         .expect(res => {
           if (res.statusCode !== 200) {
-            throw new Error(`Invalid response code: ${res.statusCode}\n${JSON.stringify(res.body)}`);
+            const errMsg = `Invalid response code: ${res.statusCode}\n${JSON.stringify(res.body)}`;
+            throw new Error(errMsg);
           }
 
           const examplePngPath = path.join(fixturePath, 'example.png');
