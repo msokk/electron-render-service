@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const path = require('path');
-const electron = require('electron-prebuilt');
+const electron = require('electron');
 const proc = require('child_process');
 
 const args = path.join(__dirname, '../src/server.js');

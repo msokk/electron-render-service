@@ -1,4 +1,4 @@
-const async = require('async');
+const queue = require('async/queue');
 const { renderWorker, createWindow } = require('./renderer');
 
 /**
@@ -13,7 +13,7 @@ module.exports = class WindowPool {
 
     this.windowPool = {};
     this.createPool(concurrency);
-    this.queue = async.queue(this.queueWorker.bind(this), concurrency);
+    this.queue = queue(this.queueWorker.bind(this), concurrency);
   }
 
   /**

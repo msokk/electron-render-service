@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 const pjson = require('../package.json');
-const { BrowserWindow } = require('electron'); // eslint-disable-line import/no-unresolved
+const { BrowserWindow } = require('electron');
 const retry = require('retry');
 
 const { validateResult } = require('./error_handler');

@@ -5,7 +5,8 @@ const expressValidator = require('express-validator');
 const path = require('path');
 const fs = require('fs');
 
-const electronApp = require('electron').app; // eslint-disable-line import/no-unresolved
+const electronApp = require('electron').app;
+
 electronApp.commandLine.appendSwitch('disable-http-cache');
 electronApp.commandLine.appendSwitch('disable-gpu');
 
