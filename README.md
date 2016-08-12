@@ -14,7 +14,7 @@ Based on official [Debian Jessie](https://hub.docker.com/_/debian/) image, uses 
 
 
 1. `docker run -t -e RENDERER_ACCESS_KEY=secret -p 3000:3000 msokk/electron-render-service`
-2. `wget -o out.pdf 'http://<node_address>:3000/pdf?accessKey=secret&url=https%3A%2F%2Fgithub.com%2Fmsokk%2Felectron-render-service'`
+2. `wget -O out.pdf 'http://<node_address>:3000/pdf?accessKey=secret&url=https%3A%2F%2Fgithub.com%2Fmsokk%2Felectron-render-service'`
 
 > NB: Set bigger shared memory size `--shm-size=Xm` (default: `64m`) if dealing with very heavy pages.
 
@@ -37,7 +37,7 @@ npm install -g electron-render-service
 # Run in virtual framebuffer
 RENDERER_ACCESS_KEY=secret xvfb-run --server-args="-screen 0 1024x768x24" electron-render-service
 
-wget -o out.pdf 'http://localhost:3000/pdf?accessKey=secret&url=https%3A%2F%2Fgithub.com%2Fmsokk%2Felectron-render-service'
+wget -O out.pdf 'http://localhost:3000/pdf?accessKey=secret&url=https%3A%2F%2Fgithub.com%2Fmsokk%2Felectron-render-service'
 ```
 
 
