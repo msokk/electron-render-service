@@ -1,5 +1,5 @@
 function printUsage(type = '[pdf|png|jpeg]', url = '') {
-  return `Usage: GET ${url}/${type}?url=http://google.com&accessKey=[token]`;
+  return `Usage: GET ${url}/${type}?accessKey=[token]&url=http%3A%2F%2Fgoogle.com`;
 }
 exports.printUsage = printUsage;
 
