@@ -250,4 +250,4 @@ electronApp.once('ready', () => {
 process.on('exit', code => electronApp.exit(code));
 
 // Passthrough error handler to silence Electron GUI prompt
-process.on('uncaughtException', err => { throw err; });
+process.on('uncaughtException', (err) => { throw err; });

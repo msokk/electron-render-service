@@ -8,7 +8,7 @@ if (process.env[KEY_PREFIX]) validKeys.global = process.env[KEY_PREFIX];
 Object.keys(process.env)
   .filter(k => k.startsWith(`${KEY_PREFIX}_`))
   .filter(k => process.env[k].length > 0)
-  .forEach(k => { validKeys[k.replace(`${KEY_PREFIX}_`, '').toLowerCase()] = process.env[k]; });
+  .forEach((k) => { validKeys[k.replace(`${KEY_PREFIX}_`, '').toLowerCase()] = process.env[k]; });
 
 if (Object.keys(validKeys).length === 0) {
   process.stderr.write(`No ${KEY_PREFIX} environment variable defined!\n`);

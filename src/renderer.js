@@ -131,7 +131,7 @@ exports.createWindow = function createWindow() {
   webContents.setUserAgent(`${webContents.getUserAgent()} ${pjson.name}/${pjson.version}`);
 
   // Emit end events to an aggregate for worker to listen on once
-  ['did-fail-load', 'crashed', 'did-finish-load', 'timeout'].forEach(e => {
+  ['did-fail-load', 'crashed', 'did-finish-load', 'timeout'].forEach((e) => {
     webContents.on(e, (...args) => webContents.emit('finished', e, ...args));
   });
 

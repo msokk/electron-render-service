@@ -54,7 +54,8 @@ module.exports = class WindowPool {
     let n = concurrency;
     const setBusy = (id, value) => { this.windowPool[id].busy = value; };
 
-    while (n-- > 0) {
+    while (n > 0) {
+      n -= 1;
       const window = createWindow();
 
       // Basic locking
