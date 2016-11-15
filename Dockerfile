@@ -28,7 +28,7 @@ RUN sed -i 's/main/main contrib/g' /etc/apt/sources.list && \
 COPY package.json /app/package.json
 
 RUN apt-get update && apt-get install -y nodejs && \
-    sed -i '/electron-prebuilt/d' ./package.json && \
+    sed -i '/\"electron\"\:/d' ./package.json && \
     npm install --production --no-optional && \
     apt-get remove -y nodejs && apt-get clean && rm -rf /var/lib/apt/lists/*
 
