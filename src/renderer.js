@@ -86,7 +86,10 @@ exports.renderWorker = function renderWorker(window, task, done) {
     // Look for specific string before rendering
     } else if (task.waitForText) {
       console.log('delaying pdf generation, waiting for text "%s" to appear', task.waitForText);
-      waitOperation.attempt(() => webContents.findInPage(task.waitForText));
+      waitOperation.attempt(() => {
+        webContents.findInPage(''); // TODO: Workaround for https://crbug.com/670498
+        webContents.findInPage(task.waitForText);
+      });
 
       webContents.on('found-in-page', function foundInPage(event, result) {
         if (result.matches === 0) {
