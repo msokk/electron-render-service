@@ -3,7 +3,7 @@ const pjson = require('../package.json');
 const { BrowserWindow } = require('electron');
 const retry = require('retry');
 
-const { validateResult } = require('./error_handler');
+const { validateResult, RendererError } = require('./error_handler');
 
 const TIMEOUT = parseInt(process.env.TIMEOUT, 10) || 30;
 const DEVELOPMENT = process.env.NODE_ENV === 'development';
@@ -90,7 +90,8 @@ exports.renderWorker = function renderWorker(window, task, done) {
 
       webContents.on('found-in-page', function foundInPage(event, result) {
         if (result.matches === 0) {
-          waitOperation.retry(new Error('not ready to render'));
+          const isRetrying = waitOperation.retry(new Error('not ready to render'));
+          if (!isRetrying) done(new RendererError('TEXT_NOT_FOUND', `Failed to find text: ${task.waitForText}`, 404));
           return;
         }
 
