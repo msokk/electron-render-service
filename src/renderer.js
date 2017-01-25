@@ -78,8 +78,11 @@ exports.renderWorker = function renderWorker(window, task, done) {
         .catch(ex => done(ex));
     }
 
+    if (type !== 'did-finish-load') {
+      renderIt();
+
     // Delay rendering n seconds
-    if (task.delay > 0) {
+    } else if (task.delay > 0) {
       console.log('delaying pdf generation by %sms', task.delay * 1000);
       setTimeout(renderIt, task.delay * 1000);
 
