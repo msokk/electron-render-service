@@ -15,14 +15,14 @@ const parseBuffer = (res, fn) => { // Superagent does not detect PDF
 
 describe('integration', () => {
   describe('GET /stats', () => {
-    it('should disallow access without key', done => {
+    it('should disallow access without key', (done) => {
       request
         .get('/stats')
         .set('Accept', 'application/json')
         .expect(403, done);
     });
 
-    it('should print empty stats', done => {
+    it('should print empty stats', (done) => {
       request.get('/stats')
         .query({ accessKey: process.env.RENDERER_ACCESS_KEY })
         .set('Accept', 'application/json')
@@ -40,7 +40,7 @@ describe('integration', () => {
 
       request.get('/png')
         .query({ accessKey: process.env.RENDERER_ACCESS_KEY, url: 'https://example.com/' })
-        .expect(res => {
+        .expect((res) => {
           if (res.statusCode !== 200) {
             const errMsg = `Invalid response code: ${res.statusCode}\n${JSON.stringify(res.body)}`;
             throw new Error(errMsg);
@@ -64,7 +64,7 @@ describe('integration', () => {
 
       request.get('/png')
         .query({ accessKey: process.env.RENDERER_ACCESS_KEY, url: 'http://acid2.acidtests.org/#top', delay: 1 })
-        .expect(res => {
+        .expect((res) => {
           if (res.statusCode !== 200) {
             throw new Error(`Invalid response code: ${res.statusCode}\n${res.body}`);
           }
@@ -89,7 +89,7 @@ describe('integration', () => {
       request.get('/pdf')
         .parse(parseBuffer) // Superagent does not detect PDF
         .query({ accessKey: process.env.RENDERER_ACCESS_KEY, url: 'https://example.com/' })
-        .expect(res => {
+        .expect((res) => {
           if (res.statusCode !== 200) {
             throw new Error(`Invalid response code: ${res.statusCode}\n${res.body}`);
           }
