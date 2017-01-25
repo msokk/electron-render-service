@@ -3,7 +3,7 @@
 [![](https://images.microbadger.com/badges/image/msokk/electron-render-service.svg)](http://microbadger.com/images/msokk/electron-render-service "Get your own image badge on microbadger.com")
 [![Docker Hub](https://img.shields.io/badge/docker-ready-blue.svg)](https://hub.docker.com/r/msokk/electron-render-service/)
 [![npm](https://img.shields.io/npm/v/electron-render-service.svg)](https://www.npmjs.com/package/electron-render-service)
-[![Dependency Status](https://david-dm.org/msokk/electron-render-service.svg)](https://david-dm.org/msokk/electron-render-service)
+[![Greenkeeper badge](https://badges.greenkeeper.io/msokk/electron-render-service.svg)](https://greenkeeper.io/)
 
 Simple PDF/PNG/JPEG render service, accepts webpage URL and returns the resource.
 
@@ -55,7 +55,7 @@ wget -O out.pdf 'http://localhost:3000/pdf?accessKey=secret&url=https%3A%2F%2Fgi
   * `printBackground` - Whether to print CSS backgrounds. (default: `true`)
   * `landscape` -  `true` for landscape, `false` for portrait. (default: `false`)
   * `removePrintMedia` - Removes any `<link media="print">` stylesheets on page before render. (default: `false`)
-  * `delay` - Specify how long to wait before generating the PDF (default: `0`)
+  * `delay` - Specify how many seconds to wait before generating the PDF (default: `0`)
   * `waitForText` - Specify a specific string of text to find before generating the PDF (default: `false`)
 
 ### `POST /pdf`
@@ -69,7 +69,7 @@ Identical as above, omit `url` and provide HTML in request body.
   * `accessKey` - Authentication key.
   * `url` - Full URL to fetch.
   * `quality` - JPEG quality. (default: `80`)
-  * `delay` - Specify how long to wait before generating the image (default: `0`)
+  * `delay` - Specify how many seconds to wait before generating the image (default: `0`)
   * `waitForText` - Specify a specific string of text to find before generating the image (default: `false`)
   * `browserWidth` - Browser window width (default: `rect.width || env.WINDOW_WIDTH`, max: `3000`)
   * `browserHeight` - Browser window height (default: `rect.height || env.WINDOW_HEIGHT`, max: `3000`)
