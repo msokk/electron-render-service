@@ -1,9 +1,10 @@
 # electron-render-service
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/msokk/electron-render-service.svg)](https://greenkeeper.io/)
 [![Build Status](https://travis-ci.org/msokk/electron-render-service.svg?branch=master)](https://travis-ci.org/msokk/electron-render-service)
 [![](https://images.microbadger.com/badges/image/msokk/electron-render-service.svg)](http://microbadger.com/images/msokk/electron-render-service "Get your own image badge on microbadger.com")
 [![Docker Hub](https://img.shields.io/badge/docker-ready-blue.svg)](https://hub.docker.com/r/msokk/electron-render-service/)
 [![npm](https://img.shields.io/npm/v/electron-render-service.svg)](https://www.npmjs.com/package/electron-render-service)
-[![Greenkeeper badge](https://badges.greenkeeper.io/msokk/electron-render-service.svg)](https://greenkeeper.io/)
 
 Simple PDF/PNG/JPEG render service, accepts webpage URL and returns the resource.
 
