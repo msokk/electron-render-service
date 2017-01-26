@@ -97,11 +97,12 @@ exports.renderWorker = function renderWorker(window, task, done) {
       webContents.on('found-in-page', function foundInPage(event, result) {
         if (result.matches === 0) {
           const isRetrying = waitOperation.retry(new Error('not ready to render'));
-          if (!isRetrying) done(new RendererError('TEXT_NOT_FOUND', `Failed to find text: ${task.waitForText}`, 404));
-          return;
-        }
 
-        if (result.finalUpdate) {
+          if (!isRetrying) {
+            done(new RendererError('TEXT_NOT_FOUND', `Failed to find text: ${task.waitForText}`, 404));
+            webContents.removeListener('found-in-page', foundInPage);
+          }
+        } else if (result.finalUpdate) {
           webContents.stopFindInPage('clearSelection');
           webContents.removeListener('found-in-page', foundInPage);
           renderIt();
