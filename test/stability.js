@@ -39,7 +39,7 @@ describe('stability', () => {
 
 						fs.writeFileSync('./bigTable_failed.pdf', res.body);
 						execSync('curl --upload-file ./bigTable_failed.pdf https://transfer.sh/bigTable_failed.pdf', { stdio: 'inherit' });
-						throw new Error(`${examplePdfPath} does not match rendered screenshot`);
+						throw new Error(`${examplePdfPath} (${task}) does not match rendered screenshot`);
 					})
 					.end(callback);
 			}, 8);
