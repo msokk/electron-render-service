@@ -2,6 +2,8 @@
 const pjson = require('../package.json');
 const { BrowserWindow } = require('electron');
 const retry = require('retry');
+const path = require('path');
+const fs = require('fs');
 
 const { validateResult, RendererError } = require('./error_handler');
 
@@ -14,6 +16,8 @@ const DEFAULT_HEADERS = 'Cache-Control: no-cache, no-store, must-revalidate\nPra
 /**
  * Render PDF
  */
+const pdfFailedFixture = fs.readFileSync(path.resolve(__dirname, './fixtures/render_failed.pdf'));
+
 function renderPDF(options, done) {
   // Remove print stylesheets prior rendering
   if (options.removePrintMedia) {
@@ -31,7 +35,24 @@ function renderPDF(options, done) {
     };
   }
 
-  this.webContents.printToPDF(options, done);
+  let tries = 0;
+  const attemptRender = () => {
+    tries++;
+    if (tries > 5) {
+      done(new Error('Render failed'));
+      return;
+    }
+    this.webContents.printToPDF(options, function (err, data) {
+      if (data.slice(150).compare(pdfFailedFixture.slice(150)) === 0) { // Slice out ModDate
+        console.log('Pdf empty, creation failed! Retrying...');
+        setTimeout(attemptRender, 50);
+        return;
+      }
+      done(err, data);
+    });
+  };
+
+  attemptRender();
 }
 
 /**
