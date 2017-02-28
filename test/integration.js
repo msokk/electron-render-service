@@ -106,4 +106,32 @@ describe('integration', () => {
         .end(done);
     });
   });
+
+    describe('POST /pdf', () => {
+      it('should render valid pdf from POSTED html in fixtures/example.html', function renderPdf(done) {
+        this.slow(10000);
+        const exampleHtmlPath = path.join(fixturePath, 'example.html');
+
+        request.post('/pdf')
+          .parse(parseBuffer) // Superagent does not detect PDF
+          .type('form')
+          .query({ accessKey: process.env.RENDERER_ACCESS_KEY })
+          .send(fs.readFileSync(exampleHtmlPath, 'utf-8'))
+          .expect((res) => {
+              if (res.statusCode !== 200) {
+                  throw new Error(`Invalid response code: ${res.statusCode}\n${res.body}`);
+              }
+
+              const examplePdfPath = path.join(fixturePath, 'example.pdf');
+              const fixture = fs.readFileSync(examplePdfPath);
+
+              if (res.body.slice(150).compare(fixture.slice(150)) === 0) return; // Slice out ModDate
+
+              fs.writeFileSync('./example_failed.pdf', res.body);
+              execSync('curl --upload-file ./example_failed.pdf https://transfer.sh/example_failed.pdf', { stdio: 'inherit' });
+              throw new Error(`${examplePdfPath} does not match rendered pdf`);
+          })
+          .end(done);
+        });
+    });
 });
