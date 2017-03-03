@@ -3,11 +3,11 @@ FROM buildpack-deps:jessie-curl
 MAINTAINER Mihkel Sokk <mihkelsokk@gmail.com>
 
 ENV RENDERER_ACCESS_KEY=changeme CONCURRENCY=1 WINDOW_WIDTH=1024 WINDOW_HEIGHT=768 NODE_ENV=production \
-    ELECTRON_VERSION=1.4.15 ELECTRON_ENABLE_STACK_DUMPING=true ELECTRON_ENABLE_LOGGING=true
+    ELECTRON_VERSION=1.6.1 ELECTRON_ENABLE_STACK_DUMPING=true ELECTRON_ENABLE_LOGGING=true
 
 WORKDIR /app
 EXPOSE 3000
-CMD xvfb-run --server-args="-screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24" ./electron --disable-gpu src/server.js
+CMD ["xvfb-run", "--server-args=\"-screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24\"", "./electron --disable-gpu src/server.js"]
 
 # Add subpixel hinting
 COPY .fonts.conf /root/.fonts.conf
