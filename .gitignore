@@ -1,3 +1,5 @@
 node_modules/
 .envrc
 npm-debug.log
+public
+.DS_Store

@@ -3,6 +3,7 @@ const morgan = require('morgan');
 const responseTime = require('response-time');
 const expressValidator = require('express-validator');
 const path = require('path');
+const url = require('url');
 const fs = require('fs');
 
 const electronApp = require('electron').app;
@@ -92,6 +93,15 @@ app.get('/pdf', auth, (req, res) => {
     waitForText: { // Specify a specific string of text to find before generating the PDF
       optional: true, notEmpty: true,
     },
+    sendBinaryOrURL: { // Whether to send the response back directly as a binary, or serve a temporary URL with the resource
+      optional: true,
+      matches: {
+        options: [/binary|url/],
+      },
+    },
+    filename: { // Filename to serve at a URL for the rendered PDF
+      optional: true,
+    },
   });
 
   const validationResult = req.validationErrors();
@@ -115,7 +125,7 @@ app.get('/pdf', auth, (req, res) => {
   req.sanitize('delay').toInt(10);
 
   const { pageSize = 'A4', marginsType = 0, printBackground = true, landscape = false,
-    removePrintMedia = false, delay = 0, waitForText = false } = req.query;
+    removePrintMedia = false, delay = 0, waitForText = false, sendBinaryOrURL = 'binary', filename = `download-${new Date().getTime()}.pdf` } = req.query;
   const url = (res.locals.tmpFile ? `file://${res.locals.tmpFile}` : req.query.url);
 
   req.app.pool.enqueue({
@@ -135,7 +145,19 @@ app.get('/pdf', auth, (req, res) => {
     if (handleErrors(err, req, res)) return;
 
     setContentDisposition(res, 'pdf');
-    res.type('pdf').send(buffer);
+
+    if(sendBinaryOrURL.match(/url/i)){
+      // Save a temporary file and serve it
+      fs.writeFile(`public/${filename}`, buffer, function(err) {
+          if(err) {
+              return console.log(err);
+          }
+          res.json({url: `${req.protocol}://${req.headers.host}/public/${filename}`});
+      });
+    }
+    else{
+      res.type('pdf').send(buffer);
+    }
   });
 });
 
@@ -237,6 +259,24 @@ app.get('/stats', auth, (req, res) => {
  */
 app.get('/', (req, res) => res.send(printUsage()));
 
+// Public directory for generated PDFs
+// app.use(express.static('public'));
+
+// Delete a file after it has been accessed
+app.get('/public/:filename', function(req, res){
+  let filename = req.params.filename;
+  var stream = fs.createReadStream(`public/${filename}`, {bufferSize: 64 * 1024})
+  stream.pipe(res);
+
+  var had_error = false;
+  stream.on('error', function(err){
+    had_error = true;
+  });
+
+  stream.on('close', function(){
+    if (!had_error) fs.unlink(`public/${filename}`);
+  });
+});
 
 // Electron finished booting
 electronApp.once('ready', () => {
