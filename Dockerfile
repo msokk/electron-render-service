@@ -7,7 +7,6 @@ ENV RENDERER_ACCESS_KEY=changeme CONCURRENCY=1 WINDOW_WIDTH=1024 WINDOW_HEIGHT=7
 
 WORKDIR /app
 EXPOSE 3000
-CMD ["xvfb-run", "--server-args=\"-screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24\"", "./electron --disable-gpu src/server.js"]
 
 # Add subpixel hinting
 COPY .fonts.conf /root/.fonts.conf
@@ -33,3 +32,5 @@ RUN apt-get update && apt-get install -y nodejs && \
     apt-get remove -y nodejs && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY . /app
+
+CMD ["xvfb-run", "--server-args=\"-screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24\"", "./electron --disable-gpu src/server.js"]
