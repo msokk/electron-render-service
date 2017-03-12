@@ -37,12 +37,12 @@ function renderPDF(options, done) {
 
   let tries = 0;
   const attemptRender = () => {
-    tries++;
+    tries += 1;
     if (tries > 5) {
       done(new Error('Render failed'));
       return;
     }
-    this.webContents.printToPDF(options, function (err, data) {
+    this.webContents.printToPDF(options, (err, data) => {
       if (data.slice(150).compare(pdfFailedFixture.slice(150)) === 0) { // Slice out ModDate
         console.log('Pdf empty, creation failed! Retrying...');
         setTimeout(attemptRender, 50);
