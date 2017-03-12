@@ -20,8 +20,6 @@ Based on official [Debian Jessie](https://hub.docker.com/_/debian/) image, uses 
 
 > NB: Set bigger shared memory size `--shm-size=Xm` (default: `64m`) if dealing with very heavy pages.
 
-> Note: Add `--security-opt seccomp:unconfined` to supress `libudev: udev_has_devtmpfs: name_to_handle_at on /dev: Operation not permitted` warning.
-
 
 
 ## Installation on Debian with Node.js
