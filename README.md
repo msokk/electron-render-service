@@ -74,7 +74,7 @@ Identical as above, omit `url` and provide HTML in request body.
   * `waitForText` - Specify a specific string of text to find before generating the image (default: `false`)
   * `browserWidth` - Browser window width (default: `rect.width || env.WINDOW_WIDTH`, max: `3000`)
   * `browserHeight` - Browser window height (default: `rect.height || env.WINDOW_HEIGHT`, max: `3000`)
-  * Clipping rectangle (optional, but all 4 integers need to be set)
+  * Clipping rectangle (optional, but all four fields must be defined)
     * `clippingRect[x]`
     * `clippingRect[y]`
     * `clippingRect[width]`
