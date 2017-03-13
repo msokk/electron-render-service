@@ -3,7 +3,6 @@ const morgan = require('morgan');
 const responseTime = require('response-time');
 const expressValidator = require('express-validator');
 const path = require('path');
-const url = require('url');
 const fs = require('fs');
 
 const electronApp = require('electron').app;
@@ -34,32 +33,30 @@ app.disable('x-powered-by');
 app.enable('trust proxy');
 
 app.post(/^\/(pdf|png|jpeg)/, auth, (req, res, next) => {
-  const tmpFile = path.join('/tmp/', `${(new Date()).toUTCString()}-${process.pid}-${
+    const tmpFile = path.join('/tmp/', `${(new Date()).toUTCString()}-${process.pid}-${
       ((Math.random() * 0x100000000) + 1).toString(36)}.html`);
 
-  const writeStream = fs.createWriteStream(tmpFile);
-  req.pipe(writeStream);
+    const writeStream = fs.createWriteStream(tmpFile);
+    req.pipe(writeStream);
 
-  writeStream.on('finish', () => {
-    if (!fs.statSync(tmpFile).size) {
-      res.status(400).send({
-        input_errors: [
-          {
-            param: 'body',
-            msg: 'Please post raw HTML',
-          },
-        ],
-      });
-      return;
-    }
+    writeStream.on('finish', () => {
+        if (!fs.statSync(tmpFile).size) {
+            res.status(400).send({
+                input_errors: [{
+                    param: 'body',
+                    msg: 'Please post raw HTML',
+                }, ],
+            });
+            return;
+        }
 
-    // continue as a regular GET request
-    /* eslint-disable no-param-reassign */
-    req.method = 'GET';
-    res.locals.tmpFile = tmpFile;
-    /* eslint-enable no-param-reassign */
-    next();
-  });
+        // continue as a regular GET request
+        /* eslint-disable no-param-reassign */
+        req.method = 'GET';
+        res.locals.tmpFile = tmpFile;
+        /* eslint-enable no-param-reassign */
+        next();
+    });
 });
 
 /**
@@ -68,97 +65,89 @@ app.post(/^\/(pdf|png|jpeg)/, auth, (req, res, next) => {
  * See more at https://git.io/vwDaJ
  */
 app.get('/pdf', auth, (req, res) => {
-  req.check({
-    pageSize: { // Specify page size of the generated PDF
-      optional: true,
-      matches: {
-        options: [/A3|A4|A5|Legal|Letter|Tabloid|[0-9]+x[0-9]+/],
-      },
-    },
-    marginsType: { // Specify the type of margins to use
-      optional: true, isInt: true, isIn: { options: [[0, 1, 2]] },
-    },
-    printBackground: { // Whether to print CSS backgrounds.
-      optional: true, isBoolean: true,
-    },
-    landscape: { // true for landscape, false for portrait.
-      optional: true, isBoolean: true,
-    },
-    removePrintMedia: { // Removes any <link media="print"> stylesheets on page before render.
-      optional: true, isBoolean: true,
-    },
-    delay: { // Specify how long to wait before generating the PDF
-      optional: true, isInt: true,
-    },
-    waitForText: { // Specify a specific string of text to find before generating the PDF
-      optional: true, notEmpty: true,
-    },
-    sendBinaryOrURL: { // Whether to send the response back directly as a binary, or serve a temporary URL with the resource
-      optional: true,
-      matches: {
-        options: [/binary|url/],
-      },
-    },
-    filename: { // Filename to serve at a URL for the rendered PDF
-      optional: true,
-    },
-  });
+    req.check({
+        pageSize: { // Specify page size of the generated PDF
+            optional: true,
+            matches: {
+                options: [/A3|A4|A5|Legal|Letter|Tabloid|[0-9]+x[0-9]+/],
+            },
+        },
+        marginsType: { // Specify the type of margins to use
+            optional: true,
+            isInt: true,
+            isIn: { options: [
+                    [0, 1, 2]
+                ] },
+        },
+        printBackground: { // Whether to print CSS backgrounds.
+            optional: true,
+            isBoolean: true,
+        },
+        landscape: { // true for landscape, false for portrait.
+            optional: true,
+            isBoolean: true,
+        },
+        removePrintMedia: { // Removes any <link media="print"> stylesheets on page before render.
+            optional: true,
+            isBoolean: true,
+        },
+        delay: { // Specify how long to wait before generating the PDF
+            optional: true,
+            isInt: true,
+        },
+        waitForText: { // Specify a specific string of text to find before generating the PDF
+            optional: true,
+            notEmpty: true,
+        },
+    });
 
-  const validationResult = req.validationErrors();
-  if (validationResult) {
-    res.status(400).send({ input_errors: validationResult });
-    return;
-  }
-
-  if (!res.locals.tmpFile && !(req.query.url && req.query.url.match(/^https?:\/\/.+$/i))) {
-    res.status(400).send({ input_errors: [{
-      param: 'url',
-      msg: 'Please provide url or send HTML via POST',
-    }] });
-    return;
-  }
-
-  req.sanitize('marginsType').toInt(10);
-  req.sanitize('printBackground').toBoolean(true);
-  req.sanitize('landscape').toBoolean(true);
-  req.sanitize('removePrintMedia').toBoolean(true);
-  req.sanitize('delay').toInt(10);
-
-  const { pageSize = 'A4', marginsType = 0, printBackground = true, landscape = false,
-    removePrintMedia = false, delay = 0, waitForText = false, sendBinaryOrURL = 'binary', filename = `download-${new Date().getTime()}.pdf` } = req.query;
-  const url = (res.locals.tmpFile ? `file://${res.locals.tmpFile}` : req.query.url);
-
-  req.app.pool.enqueue({
-    type: 'pdf',
-    url,
-    pageSize,
-    marginsType,
-    landscape,
-    printBackground,
-    removePrintMedia,
-    delay,
-    waitForText,
-  }, (err, buffer) => {
-    if (res.locals.tmpFile) {
-      fs.unlink(res.locals.tmpFile, () => {});
+    const validationResult = req.validationErrors();
+    if (validationResult) {
+        res.status(400).send({ input_errors: validationResult });
+        return;
     }
-    if (handleErrors(err, req, res)) return;
 
-    setContentDisposition(res, 'pdf');
+    if (!res.locals.tmpFile && !(req.query.url && req.query.url.match(/^https?:\/\/.+$/i))) {
+        res.status(400).send({
+            input_errors: [{
+                param: 'url',
+                msg: 'Please provide url or send HTML via POST',
+            }]
+        });
+        return;
+    }
 
-    if(sendBinaryOrURL.match(/url/i)){
-      // Save a temporary file and serve it
-      fs.writeFile(`public/${filename}`, buffer, function(err) {
-          if(err) {
-              return console.log(err);
-          }
-          res.json({url: `${req.protocol}://${req.headers.host}/public/${filename}`});
-      });
-    }
-    else{
-      res.type('pdf').send(buffer);
-    }
-  });
+    req.sanitize('marginsType').toInt(10);
+    req.sanitize('printBackground').toBoolean(true);
+    req.sanitize('landscape').toBoolean(true);
+    req.sanitize('removePrintMedia').toBoolean(true);
+    req.sanitize('delay').toInt(10);
+
+    const {
+        pageSize = 'A4', marginsType = 0, printBackground = true, landscape = false,
+            removePrintMedia = false, delay = 0, waitForText = false
+    } = req.query;
+    const url = (res.locals.tmpFile ? `file://${res.locals.tmpFile}` : req.query.url);
+
+    req.app.pool.enqueue({
+        type: 'pdf',
+        url,
+        pageSize,
+        marginsType,
+        landscape,
+        printBackground,
+        removePrintMedia,
+        delay,
+        waitForText,
+    }, (err, buffer) => {
+        if (res.locals.tmpFile) {
+            fs.unlink(res.locals.tmpFile, () => {});
+        }
+        if (handleErrors(err, req, res)) return;
+
+        setContentDisposition(res, 'pdf');
+        res.type('pdf').send(buffer);
+    });
 });
 
 
@@ -166,82 +155,90 @@ app.get('/pdf', auth, (req, res) => {
  * GET /png|jpeg - Render png or jpeg
  */
 app.get(/^\/(png|jpeg)/, auth, (req, res) => {
-  const type = req.params[0];
-  req.check({
-    quality: { // JPEG quality
-      optional: true, isInt: true,
-    },
-    browserWidth: { // Browser window width
-      optional: true, isInt: true,
-    },
-    browserHeight: { // Browser window height
-      optional: true, isInt: true,
-    },
-    delay: { // Specify how long to wait before generating the PDF
-      optional: true, isInt: true,
-    },
-    waitForText: { // Specify a specific string of text to find before generating the PDF
-      optional: true, notEmpty: true,
-    },
-  });
-
-  if (!res.locals.tmpFile && !(req.query.url && req.query.url.match(/^https?:\/\/.+$/i))) {
-    res.status(400).send({ input_errors: [{
-      param: 'url',
-      msg: 'Please provide url or send HTML via POST',
-    }],
-    });
-    return;
-  }
-
-  if (req.query.clippingRect) {
+    const type = req.params[0];
     req.check({
-      'clippingRect.x': { isInt: { errorMessage: 'Invalid value' } },
-      'clippingRect.y': { isInt: { errorMessage: 'Invalid value' } },
-      'clippingRect.width': { isInt: { errorMessage: 'Invalid value' } },
-      'clippingRect.height': { isInt: { errorMessage: 'Invalid value' } },
+        quality: { // JPEG quality
+            optional: true,
+            isInt: true,
+        },
+        browserWidth: { // Browser window width
+            optional: true,
+            isInt: true,
+        },
+        browserHeight: { // Browser window height
+            optional: true,
+            isInt: true,
+        },
+        delay: { // Specify how long to wait before generating the PDF
+            optional: true,
+            isInt: true,
+        },
+        waitForText: { // Specify a specific string of text to find before generating the PDF
+            optional: true,
+            notEmpty: true,
+        },
     });
-  }
 
-  const validationResult = req.validationErrors();
-  if (validationResult) {
-    res.status(400).send({ input_errors: validationResult });
-    return;
-  }
-
-  req.sanitize('quality').toInt(10);
-  req.sanitize('browserWidth').toInt(10);
-  req.sanitize('browserHeight').toInt(10);
-
-  if (req.query.clippingRect) {
-    req.sanitize('clippingRect.x').toInt(10);
-    req.sanitize('clippingRect.y').toInt(10);
-    req.sanitize('clippingRect.width').toInt(10);
-    req.sanitize('clippingRect.height').toInt(10);
-  }
-
-  const { quality = 80, delay, waitForText, clippingRect,
-    browserWidth = WINDOW_WIDTH, browserHeight = WINDOW_HEIGHT } = req.query;
-  const url = (res.locals.tmpFile ? `file://${res.locals.tmpFile}` : req.query.url);
-
-  req.app.pool.enqueue({
-    type,
-    url,
-    quality,
-    delay,
-    waitForText,
-    clippingRect,
-    browserWidth: Math.min(browserWidth, LIMIT), // Cap width and height to avoid overload
-    browserHeight: Math.min(browserHeight, LIMIT),
-  }, (err, buffer) => {
-    if (res.locals.tmpFile) {
-      fs.unlink(res.locals.tmpFile, () => {});
+    if (!res.locals.tmpFile && !(req.query.url && req.query.url.match(/^https?:\/\/.+$/i))) {
+        res.status(400).send({
+            input_errors: [{
+                param: 'url',
+                msg: 'Please provide url or send HTML via POST',
+            }],
+        });
+        return;
     }
-    if (handleErrors(err, req, res)) return;
 
-    setContentDisposition(res, type);
-    res.type(type).send(buffer);
-  });
+    if (req.query.clippingRect) {
+        req.check({
+            'clippingRect.x': { isInt: { errorMessage: 'Invalid value' } },
+            'clippingRect.y': { isInt: { errorMessage: 'Invalid value' } },
+            'clippingRect.width': { isInt: { errorMessage: 'Invalid value' } },
+            'clippingRect.height': { isInt: { errorMessage: 'Invalid value' } },
+        });
+    }
+
+    const validationResult = req.validationErrors();
+    if (validationResult) {
+        res.status(400).send({ input_errors: validationResult });
+        return;
+    }
+
+    req.sanitize('quality').toInt(10);
+    req.sanitize('browserWidth').toInt(10);
+    req.sanitize('browserHeight').toInt(10);
+
+    if (req.query.clippingRect) {
+        req.sanitize('clippingRect.x').toInt(10);
+        req.sanitize('clippingRect.y').toInt(10);
+        req.sanitize('clippingRect.width').toInt(10);
+        req.sanitize('clippingRect.height').toInt(10);
+    }
+
+    const {
+        quality = 80, delay, waitForText, clippingRect,
+            browserWidth = WINDOW_WIDTH, browserHeight = WINDOW_HEIGHT
+    } = req.query;
+    const url = (res.locals.tmpFile ? `file://${res.locals.tmpFile}` : req.query.url);
+
+    req.app.pool.enqueue({
+        type,
+        url,
+        quality,
+        delay,
+        waitForText,
+        clippingRect,
+        browserWidth: Math.min(browserWidth, LIMIT), // Cap width and height to avoid overload
+        browserHeight: Math.min(browserHeight, LIMIT),
+    }, (err, buffer) => {
+        if (res.locals.tmpFile) {
+            fs.unlink(res.locals.tmpFile, () => {});
+        }
+        if (handleErrors(err, req, res)) return;
+
+        setContentDisposition(res, type);
+        res.type(type).send(buffer);
+    });
 });
 
 
@@ -249,8 +246,8 @@ app.get(/^\/(png|jpeg)/, auth, (req, res) => {
  * GET /stats - Output some stats as JSON
  */
 app.get('/stats', auth, (req, res) => {
-  if (req.keyLabel !== 'global') return res.sendStatus(403);
-  return res.send(req.app.pool.stats());
+    if (req.keyLabel !== 'global') return res.sendStatus(403);
+    return res.send(req.app.pool.stats());
 });
 
 
@@ -259,30 +256,12 @@ app.get('/stats', auth, (req, res) => {
  */
 app.get('/', (req, res) => res.send(printUsage()));
 
-// Public directory for generated PDFs
-// app.use(express.static('public'));
-
-// Delete a file after it has been accessed
-app.get('/public/:filename', function(req, res){
-  let filename = req.params.filename;
-  var stream = fs.createReadStream(`public/${filename}`, {bufferSize: 64 * 1024})
-  stream.pipe(res);
-
-  var had_error = false;
-  stream.on('error', function(err){
-    had_error = true;
-  });
-
-  stream.on('close', function(){
-    if (!had_error) fs.unlink(`public/${filename}`);
-  });
-});
 
 // Electron finished booting
 electronApp.once('ready', () => {
-  electronApp.ready = true;
-  app.pool = new WindowPool();
-  const listener = app.listen(PORT, HOSTNAME, () => printBootMessage(listener));
+    electronApp.ready = true;
+    app.pool = new WindowPool();
+    const listener = app.listen(PORT, HOSTNAME, () => printBootMessage(listener));
 });
 
 
