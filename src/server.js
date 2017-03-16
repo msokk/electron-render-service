@@ -8,7 +8,7 @@ const fs = require('fs');
 const electronApp = require('electron').app;
 
 electronApp.commandLine.appendSwitch('disable-http-cache');
-electronApp.commandLine.appendSwitch('disable-gpu');
+electronApp.commandLine.appendSwitch('use-gl', 'osmesa');
 
 const WindowPool = require('./window_pool');
 const auth = require('./auth');

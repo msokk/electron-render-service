@@ -14,11 +14,14 @@ COPY .fonts.conf /root/.fonts.conf
 RUN sed -i 's/main/main contrib/g' /etc/apt/sources.list && \
     curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
     apt-get upgrade -y && \
-    apt-get install -y unzip xvfb libgtk2.0-0 ttf-mscorefonts-installer libnotify4 libgconf2-4 libxss1 libnss3 dbus-x11 && \
+    apt-get install -y unzip xvfb libgtk2.0-0 ttf-mscorefonts-installer libnotify4 libgconf2-4 libxss1 libnss3 dbus-x11 libosmesa6-dev && \
 
     # Get Electron
     wget "https://github.com/atom/electron/releases/download/v${ELECTRON_VERSION}/electron-v${ELECTRON_VERSION}-linux-x64.zip" -O electron.zip && \
     unzip electron.zip && rm electron.zip && \
+
+    # Add libosmesa symlink
+    ln -s /usr/lib/x86_64-linux-gnu/libOSMesa.so libosmesa.so && \
 
     # Cleanup
     apt-get remove -y unzip && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -33,4 +36,4 @@ RUN apt-get update && apt-get install -y nodejs && \
 COPY . /app
 
 EXPOSE 3000
-CMD ["sh", "-c", "xvfb-run --server-args=\"-screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24\" ./electron --disable-gpu src/server.js"]
+CMD ["sh", "-c", "xvfb-run -e /dev/stdout --server-args=\"-screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24\" ./electron src/server.js"]
