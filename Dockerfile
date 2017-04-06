@@ -48,4 +48,4 @@ RUN mkdir /usr/share/fonts/truetype/s3/ && \
 COPY . /app
 
 EXPOSE 3000
-CMD ["sh", "-c", "xvfb-run -a --server-args=\"-screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24 -dpi 144\" ./electron src/server.js"]
+CMD ["sh", "-c", "xvfb-run -a --server-args=\"-screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24 -dpi ${DPI}\" ./electron src/server.js"]
