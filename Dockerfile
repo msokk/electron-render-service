@@ -18,11 +18,14 @@ COPY .fonts.conf /root/.fonts.conf
 RUN sed -i 's/main/main contrib/g' /etc/apt/sources.list && \
     curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
     apt-get upgrade -y && \
-    apt-get install -y unzip xvfb libgtk2.0-0 ttf-mscorefonts-installer libnotify4 libgconf2-4 libxss1 libnss3 dbus-x11 libosmesa6-dev awscli && \
+    apt-get install -y unzip xvfb libgtk2.0-0 ttf-mscorefonts-installer libnotify4 libgconf2-4 libxss1 libnss3 dbus-x11 libosmesa6-dev python-pip && \
 
     # Get Electron
     wget "https://github.com/atom/electron/releases/download/v${ELECTRON_VERSION}/electron-v${ELECTRON_VERSION}-linux-x64.zip" -O electron.zip && \
     unzip electron.zip && rm electron.zip && \
+
+    # Install awscli
+    pip install awscli && \
 
     # Add libosmesa symlink
     ln -s /usr/lib/x86_64-linux-gnu/libOSMesa.so libosmesa.so && \
