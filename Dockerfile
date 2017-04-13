@@ -32,5 +32,7 @@ RUN apt-get update && apt-get install -y nodejs && \
 
 COPY . /app
 
+RUN mkdir /app/public
+
 EXPOSE 3000
 CMD ["sh", "-c", "xvfb-run --server-args=\"-screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24\" ./electron --disable-gpu src/server.js"]

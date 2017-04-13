@@ -99,6 +99,15 @@ app.get('/pdf', auth, (req, res) => {
             optional: true,
             notEmpty: true,
         },
+        sendBinaryOrURL: { // Whether to send the response back directly as a binary, or serve a temporary URL with the resource
+          optional: true,
+          matches: {
+            options: [/binary|url/],
+          },
+        },
+        filename: { // Filename to serve at a URL for the rendered PDF
+          optional: true,
+        },
     });
 
     const validationResult = req.validationErrors();
@@ -125,8 +134,7 @@ app.get('/pdf', auth, (req, res) => {
 
     const {
         pageSize = 'A4', marginsType = 0, printBackground = true, landscape = false,
-            removePrintMedia = false, delay = 0, waitForText = false
-    } = req.query;
+            removePrintMedia = false, delay = 0, waitForText = false, sendBinaryOrURL = 'binary', filename = `download-${new Date().getTime()}.pdf` } = req.query;
     const url = (res.locals.tmpFile ? `file://${res.locals.tmpFile}` : req.query.url);
 
     req.app.pool.enqueue({
@@ -146,7 +154,19 @@ app.get('/pdf', auth, (req, res) => {
         if (handleErrors(err, req, res)) return;
 
         setContentDisposition(res, 'pdf');
-        res.type('pdf').send(buffer);
+        
+        if(sendBinaryOrURL.match(/url/i)){
+          // Save a temporary file and serve it
+          fs.writeFile(`public/${filename}`, buffer, function(err) {
+              if(err) {
+                  return console.log(err);
+              }
+              res.json({url: `${req.protocol}://${req.headers.host}/public/${filename}`});
+          });
+        }
+        else{
+          res.type('pdf').send(buffer);
+        }
     });
 });
 
