@@ -5,6 +5,8 @@ MAINTAINER Mihkel Sokk <mihkelsokk@gmail.com>
 ENV RENDERER_ACCESS_KEY=changeme CONCURRENCY=1 WINDOW_WIDTH=1024 WINDOW_HEIGHT=768 NODE_ENV=production \
     ELECTRON_VERSION=1.6.2 ELECTRON_ENABLE_STACK_DUMPING=true ELECTRON_ENABLE_LOGGING=true
 
+RUN mkdir -p /app/public
+
 WORKDIR /app
 
 # Add subpixel hinting
@@ -32,7 +34,6 @@ RUN apt-get update && apt-get install -y nodejs && \
 
 COPY . /app
 
-RUN mkdir /app/public
 
 EXPOSE 3000
 CMD ["sh", "-c", "xvfb-run --server-args=\"-screen 0 ${WINDOW_WIDTH}x${WINDOW_HEIGHT}x24\" ./electron --disable-gpu src/server.js"]
