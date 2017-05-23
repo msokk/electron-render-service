@@ -1,6 +1,6 @@
 {
   "name": "electron-render-service",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "Microservice for rendering PDF/PNG/JPEG from HTML with Electron",
   "bin": {
     "electron-render-service": "./bin/electron-render-service.js"
@@ -8,7 +8,7 @@
   "scripts": {
     "start": "electron src/server.js",
     "lint": "eslint src",
-    "test": "electron node_modules/.bin/_mocha"
+    "test": "electron node_modules/mocha/bin/_mocha --colors"
   },
   "keywords": [
     "electron",
