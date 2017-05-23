@@ -65,7 +65,7 @@ app.post(/^\/(pdf|png|jpeg)/, auth, (req, res, next) => {
  * GET /health_check - Health Response
  */
 app.get('/health_check', (req, res) => {
-    res.send({ status: 'UP' });
+  res.send({ status: 'UP' });
 });
 
 /**
