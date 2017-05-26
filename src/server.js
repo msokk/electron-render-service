@@ -4,6 +4,7 @@ const responseTime = require('response-time');
 const expressValidator = require('express-validator');
 const path = require('path');
 const fs = require('fs');
+const packageFile = require(`${process.cwd()}/package.json`);
 
 const electronApp = require('electron').app;
 
@@ -59,6 +60,20 @@ app.post(/^\/(pdf|png|jpeg)/, auth, (req, res, next) => {
     /* eslint-enable no-param-reassign */
     next();
   });
+});
+
+/**
+ * GET /health_check - Health Response
+ */
+app.get('/health_check', (req, res) => {
+  res.send({ status: 'UP' });
+});
+
+/**
+ * GET /info - Application Info
+ */
+app.get('/info', (req, res) => {
+  res.send({ [packageFile.name]: packageFile.version });
 });
 
 /**
