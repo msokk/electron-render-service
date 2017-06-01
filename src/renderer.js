@@ -152,6 +152,7 @@ exports.createWindow = function createWindow() {
       blinkFeatures: 'OverlayScrollbars', // Slimmer scrollbars
       allowDisplayingInsecureContent: true, // Show http content on https site
       allowRunningInsecureContent: true, // Run JS, CSS from http urls
+      nodeIntegration: false, // Disable exposing of Node.js symbols to DOM
     },
   });
 
