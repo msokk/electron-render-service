@@ -34,7 +34,7 @@ app.enable('trust proxy');
 
 app.post(/^\/(pdf|png|jpeg)/, auth, (req, res, next) => {
   const tmpFile = path.join('/tmp/', `${(new Date()).toUTCString()}-${process.pid}-${
-      ((Math.random() * 0x100000000) + 1).toString(36)}.html`);
+    ((Math.random() * 0x100000000) + 1).toString(36)}.html`);
 
   const writeStream = fs.createWriteStream(tmpFile);
   req.pipe(writeStream);
