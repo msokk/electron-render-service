@@ -237,6 +237,36 @@ app.get(/^\/(png|jpeg)/, auth, (req, res) => {
   });
 });
 
+app.get('/video', auth, (req, res) => {
+  const type = 'video';
+  const { quality = 80, delay, waitForText, clippingRect,
+    browserWidth = WINDOW_WIDTH, browserHeight = WINDOW_HEIGHT } = req.query;
+  const url = (res.locals.tmpFile ? `file://${res.locals.tmpFile}` : req.query.url);
+
+  req.app.pool.enqueue({
+    type,
+    url,
+    quality,
+    delay,
+    waitForText,
+    clippingRect,
+    browserWidth: Math.min(browserWidth, LIMIT), // Cap width and height to avoid overload
+    browserHeight: Math.min(browserHeight, LIMIT),
+  }, (err, buffer) => {
+    if (res.locals.tmpFile) {
+      fs.unlink(res.locals.tmpFile, () => {});
+    }
+    if (handleErrors(err, req, res)) return;
+
+    setContentDisposition(res, type);
+    res.type(type).send(buffer);
+  });
+});
+
+app.get('/gif', auth, (req, res) => {
+
+});
+
 
 /**
  * GET /stats - Output some stats as JSON

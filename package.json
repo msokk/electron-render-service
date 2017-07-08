@@ -29,6 +29,7 @@
   "dependencies": {
     "async": "^2.1.5",
     "electron": "^1.6.2",
+    "electron-recorder": "^1.0.0",
     "express": "^4.15.2",
     "express-validator": "^3.1.2",
     "morgan": "^1.8.1",
