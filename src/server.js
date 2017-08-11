@@ -3,7 +3,8 @@ const morgan = require('morgan');
 const responseTime = require('response-time');
 const expressValidator = require('express-validator');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs');;
+var cors = require('cors')
 
 const electronApp = require('electron').app;
 
@@ -23,6 +24,7 @@ const app = express();
 
 app.use(responseTime());
 app.use(expressValidator());
+app.use(cors());
 
 // Log with token
 morgan.token('key-label', req => req.keyLabel);
