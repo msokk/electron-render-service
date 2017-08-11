@@ -26,6 +26,9 @@ app.use(responseTime());
 app.use(expressValidator());
 app.use(cors());
 
+// Static route for assets to be generated when the sendBinaryOrURL flag is set to 'url'
+app.use('/public', express.static('public'))
+
 // Log with token
 morgan.token('key-label', req => req.keyLabel);
 app.use(morgan(`[:date[iso]] :key-label@:remote-addr - :method :status
