@@ -1,6 +1,6 @@
 {
   "name": "electron-render-service",
-  "version": "0.10.2",
+  "version": "0.11.0",
   "description": "Microservice for rendering PDF/PNG/JPEG from HTML with Electron",
   "bin": {
     "electron-render-service": "./bin/electron-render-service.js"
