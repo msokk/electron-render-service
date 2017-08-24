@@ -28,18 +28,18 @@
   },
   "dependencies": {
     "async": "^2.5.0",
-    "electron": "~1.6.10",
-    "express": "^4.15.3",
-    "express-validator": "^3.2.0",
+    "electron": "^1.7.5",
+    "express": "^4.15.4",
+    "express-validator": "^3.2.1",
     "morgan": "^1.8.2",
     "response-time": "^2.3.2",
     "retry": "^0.10.1"
   },
   "devDependencies": {
-    "eslint": "^4.1.1",
-    "eslint-config-airbnb-base": "^11.2.0",
-    "eslint-plugin-import": "^2.6.0",
-    "mocha": "^3.4.2",
+    "eslint": "^4.5.0",
+    "eslint-config-airbnb-base": "^11.3.2",
+    "eslint-plugin-import": "^2.7.0",
+    "mocha": "^3.5.0",
     "supertest": "^3.0.0"
   }
 }
