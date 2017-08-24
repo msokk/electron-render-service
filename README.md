@@ -20,6 +20,7 @@ Based on official [Debian Jessie](https://hub.docker.com/_/debian/) image, uses 
 
 > NB: Set bigger shared memory size `--shm-size=Xm` (default: `64m`) if dealing with very heavy pages.
 
+> Docker Swarm needs extra configuration to work - [`--shm-size` is not implemented](https://github.com/moby/moby/issues/26714) use `--mount type=tmpfs,dst=/dev/shm,tmpfs-size=134217728 ` instead and blank hostname `-e HOSTNAME=`.
 
 
 ## Installation on Debian with Node.js
