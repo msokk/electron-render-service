@@ -56,6 +56,7 @@ wget -O out.pdf 'http://localhost:3000/pdf?accessKey=secret&url=https%3A%2F%2Fgi
   * `removePrintMedia` - Removes any `<link media="print">` stylesheets on page before render. (default: `false`)
   * `delay` - Specify how many seconds to wait before generating the PDF (default: `0`)
   * `waitForText` - Specify a specific string of text to find before generating the PDF (default: `false`)
+  * `sendBinaryOrUrl` – Specify whether to return a binary stream for the browser to download, or a temporary URL from which the rendered file can be downloaded. This is an experimental feature and should only be used in a trusted environment until some work is done on ensuring filename uniqueness.
 
 ### `POST /pdf`
 
@@ -77,6 +78,7 @@ Identical as above, omit `url` and provide HTML in request body.
     * `clippingRect[y]`
     * `clippingRect[width]`
     * `clippingRect[height]`
+  * `sendBinaryOrUrl` – Specify whether to return a binary stream for the browser to download, or a temporary URL from which the rendered file can be downloaded. This is an experimental feature and should only be used in a trusted environment until some work is done on ensuring filename uniqueness.
 
 ### `POST /png|jpeg`
 
