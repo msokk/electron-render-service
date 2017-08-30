@@ -1,6 +1,6 @@
 {
   "name": "electron-render-service",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "Microservice for rendering PDF/PNG/JPEG from HTML with Electron",
   "bin": {
     "electron-render-service": "./bin/electron-render-service.js"
@@ -27,20 +27,19 @@
     "url": "https://github.com/msokk/electron-render-service.git"
   },
   "dependencies": {
-    "async": "^2.1.5",
-    "electron": "^1.6.2",
-    "express": "^4.15.2",
-    "cors":"^2.8.4",
-    "express-validator": "^3.1.2",
-    "morgan": "^1.8.1",
+    "async": "^2.5.0",
+    "electron": "^1.7.5",
+    "express": "^4.15.4",
+    "express-validator": "^3.2.1",
+    "morgan": "^1.8.2",
     "response-time": "^2.3.2",
     "retry": "^0.10.1"
   },
   "devDependencies": {
-    "eslint": "^3.17.1",
-    "eslint-config-airbnb-base": "^11.1.1",
-    "eslint-plugin-import": "^2.2.0",
-    "mocha": "^3.2.0",
+    "eslint": "^4.5.0",
+    "eslint-config-airbnb-base": "^11.3.2",
+    "eslint-plugin-import": "^2.7.0",
+    "mocha": "^3.5.0",
     "supertest": "^3.0.0"
   }
 }

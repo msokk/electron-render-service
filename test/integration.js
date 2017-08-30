@@ -57,29 +57,6 @@ describe('integration', () => {
         })
         .end(done);
     });
-
-    it('should render valid png from http://acid2.acidtests.org/#top', function renderPng(done) {
-      this.timeout(5000);
-      this.slow(10000);
-
-      request.get('/png')
-        .query({ accessKey: process.env.RENDERER_ACCESS_KEY, url: 'http://acid2.acidtests.org/#top', delay: 1 })
-        .expect((res) => {
-          if (res.statusCode !== 200) {
-            throw new Error(`Invalid response code: ${res.statusCode}\n${res.body}`);
-          }
-
-          const acidPngPath = path.join(fixturePath, 'acid2.png');
-          const fixture = fs.readFileSync(acidPngPath);
-
-          if (res.body.compare(fixture) === 0) return;
-
-          fs.writeFileSync('./acid2_failed.png', res.body);
-          execSync('curl --upload-file ./acid2_failed.png https://transfer.sh/acid2_failed.png', { stdio: 'inherit' });
-          throw new Error(`${acidPngPath} does not match rendered screenshot`);
-        })
-        .end(done);
-    });
   });
 
   describe('GET /pdf', () => {
