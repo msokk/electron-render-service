@@ -1,12 +1,7 @@
 {
   "name": "electron-render-service",
-  <<
-  << << < Updated upstream "version": "0.11.0",
-  ===
-  === =
   "version": "0.12.0",
-  >>>
-  >>> > Stashed changes "description": "Microservice for rendering PDF/PNG/JPEG from HTML with Electron",
+  "description": "Microservice for rendering PDF/PNG/JPEG from HTML with Electron",
   "bin": {
     "electron-render-service": "./bin/electron-render-service.js"
   },
