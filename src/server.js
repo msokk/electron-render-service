@@ -12,7 +12,12 @@ electronApp.commandLine.appendSwitch('disable-gpu');
 
 const WindowPool = require('./window_pool');
 const auth = require('./auth');
-const { printUsage, printBootMessage, handleErrors, setContentDisposition } = require('./util');
+const {
+  printUsage,
+  printBootMessage,
+  handleErrors,
+  setContentDisposition
+} = require('./util');
 
 const HOSTNAME = process.env.HOSTNAME || '0.0.0.0';
 const PORT = process.env.PORT || 3000;
@@ -42,12 +47,10 @@ app.post(/^\/(pdf|png|jpeg)/, auth, (req, res, next) => {
   writeStream.on('finish', () => {
     if (!fs.statSync(tmpFile).size) {
       res.status(400).send({
-        input_errors: [
-          {
-            param: 'body',
-            msg: 'Please post raw HTML',
-          },
-        ],
+        input_errors: [{
+          param: 'body',
+          msg: 'Please post raw HTML',
+        }, ],
       });
       return;
     }
@@ -75,36 +78,51 @@ app.get('/pdf', auth, (req, res) => {
       },
     },
     marginsType: { // Specify the type of margins to use
-      optional: true, isInt: true, isIn: { options: [[0, 1, 2]] },
+      optional: true,
+      isInt: true,
+      isIn: {
+        options: [
+          [0, 1, 2]
+        ]
+      },
     },
     printBackground: { // Whether to print CSS backgrounds.
-      optional: true, isBoolean: true,
+      optional: true,
+      isBoolean: true,
     },
     landscape: { // true for landscape, false for portrait.
-      optional: true, isBoolean: true,
+      optional: true,
+      isBoolean: true,
     },
     removePrintMedia: { // Removes any <link media="print"> stylesheets on page before render.
-      optional: true, isBoolean: true,
+      optional: true,
+      isBoolean: true,
     },
     delay: { // Specify how long to wait before generating the PDF
-      optional: true, isInt: true,
+      optional: true,
+      isInt: true,
     },
     waitForText: { // Specify a specific string of text to find before generating the PDF
-      optional: true, notEmpty: true,
+      optional: true,
+      notEmpty: true,
     },
   });
 
   const validationResult = req.validationErrors();
   if (validationResult) {
-    res.status(400).send({ input_errors: validationResult });
+    res.status(400).send({
+      input_errors: validationResult
+    });
     return;
   }
 
   if (!res.locals.tmpFile && !(req.query.url && req.query.url.match(/^https?:\/\/.+$/i))) {
-    res.status(400).send({ input_errors: [{
-      param: 'url',
-      msg: 'Please provide url or send HTML via POST',
-    }] });
+    res.status(400).send({
+      input_errors: [{
+        param: 'url',
+        msg: 'Please provide url or send HTML via POST',
+      }]
+    });
     return;
   }
 
@@ -114,8 +132,10 @@ app.get('/pdf', auth, (req, res) => {
   req.sanitize('removePrintMedia').toBoolean(true);
   req.sanitize('delay').toInt(10);
 
-  const { pageSize = 'A4', marginsType = 0, printBackground = true, landscape = false,
-    removePrintMedia = false, delay = 0, waitForText = false } = req.query;
+  const {
+    pageSize = 'A4', marginsType = 0, printBackground = true, landscape = false,
+      removePrintMedia = false, delay = 0, waitForText = false
+  } = req.query;
   const url = (res.locals.tmpFile ? `file://${res.locals.tmpFile}` : req.query.url);
 
   req.app.pool.enqueue({
@@ -147,43 +167,67 @@ app.get(/^\/(png|jpeg)/, auth, (req, res) => {
   const type = req.params[0];
   req.check({
     quality: { // JPEG quality
-      optional: true, isInt: true,
+      optional: true,
+      isInt: true,
     },
     browserWidth: { // Browser window width
-      optional: true, isInt: true,
+      optional: true,
+      isInt: true,
     },
     browserHeight: { // Browser window height
-      optional: true, isInt: true,
+      optional: true,
+      isInt: true,
     },
     delay: { // Specify how long to wait before generating the PDF
-      optional: true, isInt: true,
+      optional: true,
+      isInt: true,
     },
     waitForText: { // Specify a specific string of text to find before generating the PDF
-      optional: true, notEmpty: true,
+      optional: true,
+      notEmpty: true,
     },
   });
 
   if (!res.locals.tmpFile && !(req.query.url && req.query.url.match(/^https?:\/\/.+$/i))) {
-    res.status(400).send({ input_errors: [{
-      param: 'url',
-      msg: 'Please provide url or send HTML via POST',
-    }],
+    res.status(400).send({
+      input_errors: [{
+        param: 'url',
+        msg: 'Please provide url or send HTML via POST',
+      }],
     });
     return;
   }
 
   if (req.query.clippingRect) {
     req.check({
-      'clippingRect.x': { isInt: { errorMessage: 'Invalid value' } },
-      'clippingRect.y': { isInt: { errorMessage: 'Invalid value' } },
-      'clippingRect.width': { isInt: { errorMessage: 'Invalid value' } },
-      'clippingRect.height': { isInt: { errorMessage: 'Invalid value' } },
+      'clippingRect.x': {
+        isInt: {
+          errorMessage: 'Invalid value'
+        }
+      },
+      'clippingRect.y': {
+        isInt: {
+          errorMessage: 'Invalid value'
+        }
+      },
+      'clippingRect.width': {
+        isInt: {
+          errorMessage: 'Invalid value'
+        }
+      },
+      'clippingRect.height': {
+        isInt: {
+          errorMessage: 'Invalid value'
+        }
+      },
     });
   }
 
   const validationResult = req.validationErrors();
   if (validationResult) {
-    res.status(400).send({ input_errors: validationResult });
+    res.status(400).send({
+      input_errors: validationResult
+    });
     return;
   }
 
@@ -198,8 +242,10 @@ app.get(/^\/(png|jpeg)/, auth, (req, res) => {
     req.sanitize('clippingRect.height').toInt(10);
   }
 
-  const { quality = 80, delay, waitForText, clippingRect,
-    browserWidth = WINDOW_WIDTH, browserHeight = WINDOW_HEIGHT } = req.query;
+  const {
+    quality = 80, delay, waitForText, clippingRect,
+      browserWidth = WINDOW_WIDTH, browserHeight = WINDOW_HEIGHT
+  } = req.query;
   const url = (res.locals.tmpFile ? `file://${res.locals.tmpFile}` : req.query.url);
 
   req.app.pool.enqueue({
@@ -250,4 +296,6 @@ electronApp.once('ready', () => {
 process.on('exit', code => electronApp.exit(code));
 
 // Passthrough error handler to silence Electron GUI prompt
-process.on('uncaughtException', (err) => { throw err; });
+process.on('uncaughtException', (err) => {
+  throw err;
+});
