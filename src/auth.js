@@ -27,7 +27,7 @@ module.exports = function authMiddleware(req, res, next) {
     });
   }
 
-  /* eslint-disable no-param-reassign */
+  /* eslint-disable no-param-reassign, prefer-destructuring */
   req.keyLabel = key[0];
   return next();
 };

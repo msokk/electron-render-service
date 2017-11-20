@@ -58,7 +58,9 @@ function renderPDF(options, done) {
 /**
  * Render image png/jpeg
  */
-function renderImage({ type, quality, browserWidth, browserHeight, clippingRect }, done) {
+function renderImage({
+  type, quality, browserWidth, browserHeight, clippingRect,
+}, done) {
   const handleCapture = image => done(null, type === 'png' ? image.toPng() : image.toJpeg(quality));
 
   if (clippingRect) {
