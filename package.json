@@ -27,11 +27,11 @@
     "url": "https://github.com/msokk/electron-render-service.git"
   },
   "dependencies": {
-    "async": "^2.5.0",
-    "electron": "^1.7.5",
-    "express": "^4.15.4",
-    "express-validator": "^3.2.1",
-    "morgan": "^1.8.2",
+    "async": "^2.6.0",
+    "electron": "^1.7.9",
+    "express": "^4.16.2",
+    "express-validator": "^4.3.0",
+    "morgan": "^1.9.0",
     "response-time": "^2.3.2",
     "retry": "^0.10.1"
   },
