@@ -12,7 +12,7 @@ COPY .fonts.conf /root/.fonts.conf
 
     # Install the packages needed to run Electron
 RUN sed -i 's/main/main contrib/g' /etc/apt/sources.list && \
-    curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
+    curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
     apt-get upgrade -y && \
     apt-get install -y unzip xvfb libgtk2.0-0 ttf-mscorefonts-installer libnotify4 libgconf2-4 libxss1 libnss3 dbus-x11 && \
 
