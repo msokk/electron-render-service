@@ -8,7 +8,7 @@
   "scripts": {
     "start": "electron src/server.js",
     "lint": "eslint src",
-    "test": "electron node_modules/.bin/_mocha"
+    "test": "electron node_modules/.bin/_mocha --exit"
   },
   "keywords": [
     "electron",
