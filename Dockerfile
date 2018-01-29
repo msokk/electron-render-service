@@ -15,11 +15,11 @@ RUN sed -i 's/main/main contrib/g' /etc/apt/sources.list && \
     curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
     apt-get upgrade -y && \
     apt-get install -y unzip xvfb libgtk2.0-0 ttf-mscorefonts-installer libnotify4 libgconf2-4 libxss1 libnss3 dbus-x11 && \
-
+    \
     # Get Electron
     wget "https://github.com/atom/electron/releases/download/v${ELECTRON_VERSION}/electron-v${ELECTRON_VERSION}-linux-x64.zip" -O electron.zip && \
     unzip electron.zip && rm electron.zip && \
-
+    \
     # Cleanup
     apt-get remove -y unzip && apt-get clean && rm -rf /var/lib/apt/lists/*
 
