@@ -23,6 +23,9 @@ RUN sed -i 's/main/main contrib/g' /etc/apt/sources.list && \
     # Cleanup
     apt-get remove -y unzip && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# as the inline fonts should not change much put them before the app
+COPY fonts/* /usr/share/fonts/truetype/
+
 COPY package.json /app/package.json
 
 RUN apt-get update && apt-get install -y nodejs && \
