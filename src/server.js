@@ -10,6 +10,9 @@ const electronApp = require('electron').app;
 electronApp.commandLine.appendSwitch('disable-http-cache');
 electronApp.commandLine.appendSwitch('disable-gpu');
 
+const cliSwitchEnv = process.env.CHROMIUM_CLI_SWITCHES;
+(cliSwitchEnv ? cliSwitchEnv.split(',') : []).map(electronApp.commandLine.appendSwitch);
+
 const WindowPool = require('./window_pool');
 const auth = require('./auth');
 const {
