@@ -102,6 +102,7 @@ Identical as above, omit `url` and provide HTML in request body.
 * `WINDOW_HEIGHT` - Default window height (default: `768`)
 * `HOSTNAME` - Hostname to accept Express connections on (default: `0.0.0.0`)
 * `PORT` - (default: `3000`)
+* `CHROMIUM_CLI_SWITCHES` - Comma separated list of Chromium command line switches to append. For example pass `ignore-certificate-errors` as value to render self-signed pages (at your own risk).
 
 
 ## Delayed Rendering
