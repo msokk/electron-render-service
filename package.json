@@ -30,7 +30,7 @@
     "async": "^2.6.0",
     "electron": "^1.7.12",
     "express": "^4.16.2",
-    "express-validator": "^4.3.0",
+    "express-validator": "^5.0.0",
     "morgan": "^1.9.0",
     "response-time": "^2.3.2",
     "retry": "^0.10.1"
