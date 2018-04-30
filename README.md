@@ -46,7 +46,7 @@ wget -O out.pdf 'http://localhost:3000/pdf?accessKey=secret&url=https%3A%2F%2Fgi
 
 #### `GET /pdf` - Render PDF
 
-*Query params ([About PDF params](https://github.com/atom/electron/blob/master/docs/api/web-contents.md#webcontentsprinttopdfoptions-callback)):*
+*Query params ([About PDF params](https://github.com/electron/electron/blob/master/docs/api/web-contents.md#contentsprinttopdfoptions-callback)):*
 
   * `accessKey` - Authentication key.
   * `url` - Full URL to fetch.
