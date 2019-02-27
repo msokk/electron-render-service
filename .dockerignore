@@ -1,7 +1,7 @@
 .git
 .gitignore
 .envrc
-.eslintrc
+.eslintrc.json
 npm-debug.log
 
 bin/
