@@ -1,23 +1,23 @@
 FROM buildpack-deps:jessie-curl
 
-MAINTAINER Mihkel Sokk <mihkelsokk@gmail.com>
+LABEL maintainer="Mihkel Sokk <mihkelsokk@gmail.com>"
 
 ENV RENDERER_ACCESS_KEY=changeme CONCURRENCY=1 WINDOW_WIDTH=1024 WINDOW_HEIGHT=768 NODE_ENV=production \
-    ELECTRON_VERSION=1.7.12 ELECTRON_ENABLE_STACK_DUMPING=true ELECTRON_ENABLE_LOGGING=true
+    ELECTRON_VERSION=4.0.6 ELECTRON_ENABLE_STACK_DUMPING=true ELECTRON_ENABLE_LOGGING=true
 
 WORKDIR /app
 
 # Add subpixel hinting
 COPY .fonts.conf /root/.fonts.conf
 
-    # Install the packages needed to run Electron
+# Install the packages needed to run Electron
 RUN sed -i 's/main/main contrib/g' /etc/apt/sources.list && \
-    curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
+    curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get upgrade -y && \
     apt-get install -y unzip xvfb libgtk2.0-0 ttf-mscorefonts-installer libnotify4 libgconf2-4 libxss1 libnss3 dbus-x11 && \
     \
     # Get Electron
-    wget "https://github.com/atom/electron/releases/download/v${ELECTRON_VERSION}/electron-v${ELECTRON_VERSION}-linux-x64.zip" -O electron.zip && \
+    wget "https://github.com/electron/electron/releases/download/v${ELECTRON_VERSION}/electron-v${ELECTRON_VERSION}-linux-x64.zip" -O electron.zip && \
     unzip electron.zip && rm electron.zip && \
     \
     # Cleanup

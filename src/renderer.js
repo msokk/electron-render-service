@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
-const pjson = require('../package.json');
 const { BrowserWindow } = require('electron');
 const retry = require('retry');
 const path = require('path');
 const fs = require('fs');
+const pjson = require('../package.json');
 
 const { validateResult, RendererError } = require('./error_handler');
 
