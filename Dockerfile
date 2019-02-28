@@ -47,6 +47,7 @@ RUN rm electron.zip
 RUN apt-get remove -y unzip nodejs
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/*
+RUN rm -f /etc/apt/sources.list.d/nodesource.list
 
 COPY . /app
 
