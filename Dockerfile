@@ -3,12 +3,12 @@ FROM buildpack-deps:jessie-curl
 LABEL maintainer="Mihkel Sokk <mihkelsokk@gmail.com>"
 
 ENV RENDERER_ACCESS_KEY=changeme \
-		CONCURRENCY=1 \
-		WINDOW_WIDTH=1024 \
-		WINDOW_HEIGHT=768 \
-		NODE_ENV=production \
-		ELECTRON_ENABLE_STACK_DUMPING=true \
-		ELECTRON_ENABLE_LOGGING=true
+    CONCURRENCY=1 \
+    WINDOW_WIDTH=1024 \
+    WINDOW_HEIGHT=768 \
+    NODE_ENV=production \
+    ELECTRON_ENABLE_STACK_DUMPING=true \
+    ELECTRON_ENABLE_LOGGING=true
 
 WORKDIR /app
 
