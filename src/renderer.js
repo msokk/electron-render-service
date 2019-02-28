@@ -61,7 +61,7 @@ function renderPDF(options, done) {
 function renderImage({
   type, quality, browserWidth, browserHeight, clippingRect,
 }, done) {
-  const handleCapture = image => done(null, type === 'png' ? image.toPng() : image.toJpeg(quality));
+  const handleCapture = image => done(null, type === 'png' ? image.toPNG() : image.toJPEG(quality));
 
   if (clippingRect) {
     // Avoid stretching by adding rect coordinates to size
