@@ -19,8 +19,8 @@ exports.handleErrors = function handleErrors(err, req, res) {
   res.status(err.statusCode || 500).send({
     error: {
       code: err.code,
-      message: err.message || 'Internal Server Error',
-    },
+      message: err.message || 'Internal Server Error'
+    }
   });
 
   if (err instanceof Error) process.stderr.write(`${err}\n`);

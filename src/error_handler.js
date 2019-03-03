@@ -11,24 +11,36 @@ class RendererError extends Error {
 }
 exports.RendererError = RendererError;
 
-
 /**
  * Handle loading failure errors
  */
 function handleLoadingError(currentUrl, event, code, desc, url) {
   switch (code) {
     case -102:
-      return Promise.reject(new RendererError('CONNECTION_REFUSED', 'Connection attempt was refused.'));
+      return Promise.reject(
+        new RendererError('CONNECTION_REFUSED', 'Connection attempt was refused.')
+      );
     case -105:
-      return Promise.reject(new RendererError('NAME_NOT_RESOLVED', 'The host name could not be resolved.'));
+      return Promise.reject(
+        new RendererError('NAME_NOT_RESOLVED', 'The host name could not be resolved.')
+      );
     case -137:
-      return Promise.reject(new RendererError('NAME_RESOLUTION_FAILED', 'Hostname resolution failed (DNS).'));
+      return Promise.reject(
+        new RendererError('NAME_RESOLUTION_FAILED', 'Hostname resolution failed (DNS).')
+      );
     case -300:
       return Promise.reject(new RendererError('INVALID_URL', 'The URL is invalid.'));
     case -501:
-      return Promise.reject(new RendererError('INSECURE_RESPONSE', 'The server\'s response was insecure (e.g. there was a cert error).'));
+      return Promise.reject(
+        new RendererError(
+          'INSECURE_RESPONSE',
+          "The server's response was insecure (e.g. there was a cert error)."
+        )
+      );
     case -6:
-      return Promise.reject(new RendererError('FILE_NOT_FOUND', 'The file or directory cannot be found.'));
+      return Promise.reject(
+        new RendererError('FILE_NOT_FOUND', 'The file or directory cannot be found.')
+      );
     case -3:
       // Subresource fails to load, render page anyway
       if (currentUrl !== url) {
@@ -42,14 +54,14 @@ function handleLoadingError(currentUrl, event, code, desc, url) {
   }
 }
 
-
 /**
  * Validate renderer result
  */
 exports.validateResult = function validateResult(originalUrl, eventType, ...args) {
   switch (eventType) {
     // Loading failures
-    case 'did-fail-load': return handleLoadingError(originalUrl, ...args);
+    case 'did-fail-load':
+      return handleLoadingError(originalUrl, ...args);
     // Renderer process has crashed
     case 'crashed':
       return Promise.reject(new RendererError('RENDERER_CRASH', 'Render process crashed.'));
@@ -57,9 +69,11 @@ exports.validateResult = function validateResult(originalUrl, eventType, ...args
     case 'timeout':
       return Promise.reject(new RendererError('RENDERER_TIMEOUT', 'Renderer timed out.', 524));
     // Page loaded successfully
-    case 'did-finish-load': return Promise.resolve();
+    case 'did-finish-load':
+      return Promise.resolve();
 
     // Unhandled event
-    default: return Promise.reject(new RendererError('UNHANDLED_EVENT', eventType));
+    default:
+      return Promise.reject(new RendererError('UNHANDLED_EVENT', eventType));
   }
 };

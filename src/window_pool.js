@@ -31,8 +31,10 @@ module.exports = class WindowPool {
       concurrency: this.queue.concurrency,
       queue_length: this.queue.length(),
       workersList: this.queue.workersList().map(({ data }) => ({
-        url: data.url, options: data.options, type: data.type,
-      })),
+        url: data.url,
+        options: data.options,
+        type: data.type
+      }))
     };
   }
 
@@ -40,8 +42,9 @@ module.exports = class WindowPool {
    * Get a free BrowserWindow from pool
    */
   getAvailableWindow() {
-    const availableId = Object.keys(this.windowPool)
-      .filter(id => this.windowPool[id].busy === false)[0];
+    const availableId = Object.keys(this.windowPool).filter(
+      id => this.windowPool[id].busy === false
+    )[0];
 
     if (!availableId) return null;
     return this.windowPool[availableId];
@@ -52,7 +55,9 @@ module.exports = class WindowPool {
    */
   createPool(concurrency) {
     let n = concurrency;
-    const setBusy = (id, value) => { this.windowPool[id].busy = value; };
+    const setBusy = (id, value) => {
+      this.windowPool[id].busy = value;
+    };
 
     while (n > 0) {
       n -= 1;

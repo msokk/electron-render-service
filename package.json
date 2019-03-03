@@ -8,7 +8,7 @@
   "scripts": {
     "start": "electron src/server.js",
     "lint": "eslint src",
-    "test": "electron node_modules/.bin/_mocha --exit"
+    "test": "jest"
   },
   "keywords": [
     "electron",
@@ -36,10 +36,14 @@
     "retry": "^0.12.0"
   },
   "devDependencies": {
-    "eslint": "^5.14.1",
+    "eslint": "^5.15.0",
     "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-import": "^2.16.0",
-    "mocha": "^6.0.2",
-    "supertest": "^3.4.2"
+    "eslint-plugin-jest": "^22.3.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "got": "^9.6.0",
+    "jest": "^24.1.0",
+    "prettier": "^1.16.4"
   }
 }

@@ -29,9 +29,10 @@ function renderPDF(options, done) {
   // Support setting page size in microns with NxN syntax
   const customPage = options.pageSize.match(/([0-9]+)x([0-9]+)/);
   if (customPage) {
-    options.pageSize = { // eslint-disable-line no-param-reassign
+    // eslint-disable-next-line no-param-reassign
+    options.pageSize = {
       width: parseInt(customPage[1], 10),
-      height: parseInt(customPage[2], 10),
+      height: parseInt(customPage[2], 10)
     };
   }
 
@@ -43,7 +44,8 @@ function renderPDF(options, done) {
       return;
     }
     this.webContents.printToPDF(options, (err, data) => {
-      if (data.slice(150).compare(pdfFailedFixture.slice(150)) === 0) { // Slice out ModDate
+      if (data.slice(150).compare(pdfFailedFixture.slice(150)) === 0) {
+        // Slice out ModDate
         console.log('Pdf empty, creation failed! Retrying...');
         setTimeout(attemptRender, 50);
         return;
@@ -58,9 +60,7 @@ function renderPDF(options, done) {
 /**
  * Render image png/jpeg
  */
-function renderImage({
-  type, quality, browserWidth, browserHeight, clippingRect,
-}, done) {
+function renderImage({ type, quality, browserWidth, browserHeight, clippingRect }, done) {
   const handleCapture = image => done(null, type === 'png' ? image.toPNG() : image.toJPEG(quality));
 
   if (clippingRect) {
@@ -87,7 +87,7 @@ exports.renderWorker = function renderWorker(window, task, done) {
       retries: TIMEOUT,
       factor: 1,
       minTimeout: 750,
-      maxTimeout: 1000,
+      maxTimeout: 1000
     });
   }
 
@@ -104,12 +104,12 @@ exports.renderWorker = function renderWorker(window, task, done) {
     if (type !== 'did-finish-load') {
       renderIt();
 
-    // Delay rendering n seconds
+      // Delay rendering n seconds
     } else if (task.delay > 0) {
       console.log('delaying pdf generation by %sms', task.delay * 1000);
       setTimeout(renderIt, task.delay * 1000);
 
-    // Look for specific string before rendering
+      // Look for specific string before rendering
     } else if (task.waitForText) {
       console.log('delaying pdf generation, waiting for text "%s" to appear', task.waitForText);
       waitOperation.attempt(() => {
@@ -122,7 +122,9 @@ exports.renderWorker = function renderWorker(window, task, done) {
           const isRetrying = waitOperation.retry(new Error('not ready to render'));
 
           if (!isRetrying) {
-            done(new RendererError('TEXT_NOT_FOUND', `Failed to find text: ${task.waitForText}`, 404));
+            done(
+              new RendererError('TEXT_NOT_FOUND', `Failed to find text: ${task.waitForText}`, 404)
+            );
             webContents.removeListener('found-in-page', foundInPage);
           }
         } else if (result.finalUpdate) {
@@ -154,8 +156,8 @@ exports.createWindow = function createWindow() {
       blinkFeatures: 'OverlayScrollbars', // Slimmer scrollbars
       allowDisplayingInsecureContent: true, // Show http content on https site
       allowRunningInsecureContent: true, // Run JS, CSS from http urls
-      nodeIntegration: false, // Disable exposing of Node.js symbols to DOM
-    },
+      nodeIntegration: false // Disable exposing of Node.js symbols to DOM
+    }
   });
 
   // Set user agent
@@ -163,7 +165,7 @@ exports.createWindow = function createWindow() {
   webContents.setUserAgent(`${webContents.getUserAgent()} ${pjson.name}/${pjson.version}`);
 
   // Emit end events to an aggregate for worker to listen on once
-  ['did-fail-load', 'crashed', 'did-finish-load', 'timeout'].forEach((e) => {
+  ['did-fail-load', 'crashed', 'did-finish-load', 'timeout'].forEach(e => {
     webContents.on(e, (...args) => webContents.emit('finished', e, ...args));
   });
 
