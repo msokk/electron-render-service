@@ -28,10 +28,13 @@ before_script:
 script:
   - npm run lint
   - docker build -t $REPO .
-  - docker run -d -e RENDERER_ACCESS_KEY=$RENDERER_ACCESS_KEY -p 127.0.0.1:3000:3000 $REPO
+  - docker run -d --name render-service -e RENDERER_ACCESS_KEY=$RENDERER_ACCESS_KEY -p 127.0.0.1:3000:3000 $REPO
   - sleep 5
   - npm test
 
 after_success:
   - if [ ! -z "$TRAVIS_TAG" ]; then docker tag $REPO:latest $REPO:$TRAVIS_TAG; fi
   - docker push $REPO
+
+after_failure:
+  - docker logs render-service
