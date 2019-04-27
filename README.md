@@ -1,3 +1,8 @@
+# :no_entry: [DEPRECATED] 
+This project is not actively developed anymore as there are better solutions out there that are headless.
+I would suggest using https://github.com/alvarcarto/url-to-pdf-api
+
+
 # electron-render-service
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/msokk/electron-render-service.svg)](https://greenkeeper.io/)
